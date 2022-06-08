@@ -1,0 +1,22 @@
+<#= skipPdfExportStart #>
+<div class="<?php if (!<#= isExportWord #> && !<#= isExportExcel #>) { ?>card ew-card <?php } ?>ew-grid"<?= $<#= pageObj #>->ReportTableStyle ?>>
+<#= skipPdfExportEnd #>
+
+<# if (topPageLink) { #>
+<#= reportPagerExportStart #>
+<!-- Top pager -->
+<div class="card-header ew-grid-upper-panel">
+<form name="ew-pager-form" class="form-inline ew-form ew-pager-form" action="<#= Code.write(Code.CurrentPageUrl(false)) #>">
+<#= Code.raw(renderPager) #>
+</form>
+<div class="clearfix"></div>
+</div>
+<#= reportPagerExportEnd #>
+<# } // End top page link #>
+
+<#= skipPdfExportStart #>
+<!-- Report grid (begin) -->
+<div id="gmp_<#= tblVar #>" class="<#= Code.write("ResponsiveTableClass()") #>card-body ew-grid-middle-panel">
+<#= skipPdfExportEnd #>
+
+<table class="<?= $<#= pageObj #>->ReportTableClass ?>">

@@ -1,0 +1,75 @@
+<#
+    let lvl = groupIndex + 1,
+        groupField = groupFields[groupIndex],
+        lvlGrpFldObj = Code.fldObj(groupField);
+#>
+<?php
+    <#
+        for (let dtlFld of detailFields) {
+            let fldName = dtlFld.FldName,
+                fldObj = Code.fldObj(dtlFld),
+                fldParm = dtlFld.FldParm,
+                smryTypes = dtlFld.SummaryTypes;
+            for (let smryType of smryTypes) {
+    #>
+    $<#= fldObj #>->get<#= smryType #>($<#= lvlGrpFldObj #>->Records); // Get <#= smryType #>
+    <#
+            } // End for sryType
+        }; // End for dtlFld
+    #>
+    $<#= pageObj #>->resetAttributes();
+    $<#= pageObj #>->RowType = ROWTYPE_TOTAL;
+    $<#= pageObj #>->RowTotalType = ROWTOTAL_GROUP;
+    $<#= pageObj #>->RowTotalSubType = ROWTOTAL_FOOTER;
+    $<#= pageObj #>->RowGroupLevel = <#= lvl #>;
+    $<#= pageObj #>->renderRow();
+?>
+
+    <tr<?= $<#= pageObj #>->rowAttributes(); ?>>
+    <#
+        let smryGrpFldObj = Code.fldObj(groupField),
+            smryValPrefix = (lvl != groupFields.length) ? `<span class="ew-summary-text"><?= $Language->phrase("Summary") ?></span>&nbsp;<span class="ew-summary-value">` : "",
+            smryValSuffix = (lvl != groupFields.length) ? "</span>" : "";
+        groupFields.forEach((grpFld, x) => {
+            FIELD = grpFld;
+            let fldName = grpFld.FldName,
+                fldParm = grpFld.FldParm,
+                grpFldObj = Code.fldObj(grpFld);
+    #>
+<?php if ($<#= grpFldObj #>->Visible) { ?>
+    <#
+            if (x == lvl-1) {
+    #>
+        <td data-field="<#= fldParm #>"<?= $<#= grpFldObj #>->cellAttributes() ?>><#= smryValPrefix #><#= FieldGroupView() #><#= smryValSuffix #>&nbsp;<span class="ew-detail-count">(<?= FormatNumber($<#= grpFldObj #>->Count, 0); ?><#= Code.raw(Code.languagePhrase("RptDtlRec")) #>)</span></td>
+    <#
+            } else if (x < lvl) {
+    #>
+        <td data-field="<#= fldParm #>"<?= $<#= grpFldObj #>->cellAttributes() ?>><#= FieldSummaryGroupView() #></td>
+    <#
+            } else {
+    #>
+        <td data-field="<#= fldParm #>"<?= $<#= smryGrpFldObj #>->cellAttributes() ?>>&nbsp;</td>
+    <#
+            }
+    #>
+<?php } ?>
+    <#
+        }); // End for grpFld
+
+        for (let dtlFld of detailFields) {
+            FIELD = dtlFld;
+            let fldName = dtlFld.FldName,
+                fldObj = Code.fldObj(dtlFld),
+                fldParm = dtlFld.FldParm,
+                smryTypes = dtlFld.SummaryTypes;
+            let visible = Code.getName(fldObj, Code.Field.Visible);
+            for (let smryType of smryTypes) {
+    #>
+<?php if (<#= visible #>) { ?>
+        <td data-field="<#= fldParm #>"<?= $<#= fldObj #>->cellAttributes() ?>><#= FieldSummaryView({ id: smryType, lvl: lvl }) #></td>
+<?php } ?>
+    <#
+            }
+        } // End for dtlFld
+    #>
+    </tr>

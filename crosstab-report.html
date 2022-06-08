@@ -1,0 +1,69 @@
+<## Load groups start #>
+<#= include('shared/report-load-groups-script-start.php') #>
+
+<?php
+    // Show header
+    if (<#= showHeader #>) {
+?>
+
+<?php if (<#= grpCount #> > 1) { ?>
+</tbody>
+<## Report footer #>
+<#= include('shared/report-foot.html') #>
+<#= Code.raw(pageBreakContent) #>
+<?php } ?>
+
+<## Report header #>
+<#= include('shared/report-head.html') #>
+
+<thead>
+<## Report header row #>
+<#= include('./crosstab-header-row.html') #>
+</thead>
+<tbody>
+
+<?php
+        if (<#= totalGrps #> == 0) {
+            break; // Show header only
+        }
+        <#= showHeader #> = false;
+    } // End show header
+?>
+
+<## Load details start #>
+<#= include('shared/report-load-details-script-start.php') #>
+
+<## Detail rows #>
+<#= include('./crosstab-detail-row.html') #>
+
+<## Load details end #>
+<#= include('shared/report-load-details-script-end.php') #>
+
+<## Load groups end #>
+<#= include('shared/report-load-groups-script-end.php') #>
+
+<?php if (<#= totalGrps #> > 0) { ?>
+
+</tbody>
+<tfoot>
+
+<# if (TABLE.TblRptShowPageTotal) { #>
+
+<## Crosstab page total #>
+<#= include('./crosstab-page-total.html') #>
+
+<# } // End show page total #>
+
+<# if (TABLE.TblRptShowGrandTotal) { #>
+
+<## Crosstab grand total #>
+<#= include('./crosstab-grand-total.html') #>
+
+<# } // End show grand total #>
+
+</tfoot>
+
+<## Report footer #>
+<#= include('shared/report-foot.html') #>
+
+<?php } ?>

@@ -1,0 +1,25 @@
+<# if (leftCharts.length > 0) { #>
+
+<#= showReportContainerStart #>
+<!-- Left Container -->
+<div id="ew-left" class="<#= Code.write(reportLeftContentClass) #>">
+<#= showReportContainerEnd #>
+
+<#
+    // Generate charts (on left)
+    leftCharts.forEach((c, i) => {
+        CHART = c;
+        chartIndex = i;
+#>
+<## render chart #>
+<#= include('./chart-render.html') #>
+<#
+    }); // End for, chart on left
+#>
+
+<#= showReportContainerStart #>
+</div>
+<!-- /#ew-left -->
+<#= showReportContainerEnd #>
+
+<# } #>

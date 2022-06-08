@@ -1,0 +1,38 @@
+<?php
+        // Render detail row
+        $<#= pageObj #>->resetAttributes();
+        $<#= pageObj #>->RowType = ROWTYPE_DETAIL;
+        $<#= pageObj #>->renderRow();
+?>
+
+    <tr<?= $<#= pageObj #>->rowAttributes(); ?>>
+<#
+    for (let grpFld of groupFields) {
+        let fldName = grpFld.FldName,
+            fldObj = Code.fldObj(grpFld),
+            fldParm = grpFld.FldParm;
+        FIELD = grpFld;
+#>
+<?php if ($<#= fldObj #>->Visible) { ?>
+    <?php if ($<#= fldObj #>->ShowGroupHeaderAsRow) { ?>
+        <td data-field="<#= fldParm #>"<?= $<#= fldObj #>->cellAttributes(); ?>>&nbsp;</td>
+    <?php } else { ?>
+        <td data-field="<#= fldParm #>"<?= $<#= fldObj #>->cellAttributes(); ?>><#= FieldGroupView() #></td>
+    <?php } ?>
+<?php } ?>
+<#
+    }; // End for
+
+    for (let dtlFld of detailFields) {
+        let fldName = dtlFld.FldName,
+            fldObj = Code.fldObj(dtlFld),
+            fldParm = dtlFld.FldParm;
+        FIELD = dtlFld;
+#>
+<?php if ($<#= fldObj #>->Visible) { ?>
+        <td data-field="<#= fldParm #>"<?= $<#= fldObj #>->cellAttributes() ?>><#= FieldView() #></td>
+<?php } ?>
+<#
+    }
+#>
+    </tr>

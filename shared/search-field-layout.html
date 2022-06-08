@@ -1,0 +1,103 @@
+<#
+    if (!(FIELD.FldHtmlTag == "FILE" && IsBinaryField(FIELD))) {
+        let fldParm = FIELD.FldParm, fldVar = FIELD.FldVar, fldObj = Code.fldObj(), fldName = FIELD.FldName,
+            headerSpanId = "elh_" + tblVar + "_" + fldParm,
+            spanId = "el_" + tblVar + "_" + fldParm,
+            spanId2 = "el2_" + tblVar + "_" + fldParm,
+            fldSrchOpr = FIELD.FldSrchOpr,
+            fldSrchOpr2 = FIELD.FldSrchOpr2,
+            isBetween = fldSrchOpr == "BETWEEN",
+            isUserSelect = fldSrchOpr == "USER SELECT" && GetFieldType(FIELD.FldType) != 4,
+            fieldClass = (fldSrchOpr2 || isBetween || isUserSelect) ? "" : " ew-search-field-single",
+            forLabel = (UseForLabel(FIELD) || FIELD.FldHtmlTag == "NO") ? ` for="${fldVar}"` : "",
+            searchCaptionScript = "",
+            searchOperatorScript = "",
+            searchFieldScript = "",
+            searchConditionScript = "",
+            searchOperator2Script = "",
+            searchField2Script = "",
+            scriptEnd = "";
+
+        if (UseCustomTemplate) {
+            let templateId = tblVar + "_" + fldParm;
+            searchCaptionScript = CustomScriptTag(templateId, "searchcaption", templateClass);
+            searchOperatorScript = CustomScriptTag(templateId, "operator", templateClass);
+            searchFieldScript = CustomScriptTag(templateId, "value", templateClass);
+            searchConditionScript = CustomScriptTag(templateId, "condition", templateClass);
+            searchOperator2Script = CustomScriptTag(templateId, "operator2", templateClass);
+            searchField2Script = CustomScriptTag(templateId, "value2", templateClass);
+            scriptEnd = "</template>";
+        }
+
+        let initClass = (show) => show ? "" : " d-none"; // P16
+
+        let visible = Code.getName(fldObj, Code.Field.Visible),
+            caption = Code.getName(fldObj, Code.Field.Caption),
+            cellAttributes = Code.getName(fldObj, Code.Field.CellAttributes);
+#>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (<#= isMobileOrModal #>) { ?>
+<# } #>
+
+    <div id="r_<#= fldParm #>" class="form-group row">
+        <label<#= forLabel #> class="<#= Code.write(pageLeftColumnClass) #>"><#= searchCaptionScript #><span id="<#= headerSpanId #>"><#= Code.raw(caption) #></span><#= scriptEnd #>
+<# if (fldSrchOpr != "USER SELECT") { #>
+        <#= searchOperatorScript #><span class="ew-search-operator"><#= FieldOperator() #></span><#= scriptEnd #>
+<# } #>
+        </label>
+        <div class="<#= Code.write(pageRightColumnClass) #>"><div <#= Code.raw(cellAttributes) #>>
+<# if (fldSrchOpr == "USER SELECT") { #>
+        <#= searchOperatorScript #><span class="ew-search-operator"><#= FieldOperator() #></span><#= scriptEnd #>
+<# } #>
+            <#= searchFieldScript #><span id="<#= spanId #>" class="ew-search-field<#= fieldClass #>"><#= FieldSearch() #></span><#= scriptEnd #><#= JavaScriptString #>
+        <#= searchConditionScript #>
+        <# if (fldSrchOpr2) { #>
+            <span class="ew-search-cond<#= initClass(!isBetween) #>"><#= FieldSearchCondition() #></span>
+        <# } #>
+        <# if (isBetween || isUserSelect) { #>
+            <span class="ew-search-and<#= initClass(isBetween) #>"><label><#= Code.raw(Code.languagePhrase("AND")) #></label></span>
+        <# } #>
+        <#= scriptEnd #>
+        <# if (fldSrchOpr2) { #>
+            <#= searchOperator2Script #><span class="ew-search-operator2<#= initClass(!isBetween) #>"><#= FieldOperator2() #></span><#= scriptEnd #>
+        <# } #>
+        <# if (fldSrchOpr2 || isBetween || isUserSelect) { #>
+            <#= searchField2Script #><span id="<#= spanId2 #>" class="ew-search-field2<#= initClass(isBetween || fldSrchOpr2) #>"><#= FieldSearch2() #></span><#= scriptEnd #><#= JavaScriptString #>
+        <# } #>
+        </div></div>
+    </div>
+
+<# if (useTabularFormForDesktop) { #>
+<?php } else { ?>
+    <tr id="r_<#= fldParm #>">
+        <td class="<#= Code.write(pageTableLeftColumnClass) #>"><#= searchCaptionScript #><span id="<#= headerSpanId #>"><#= Code.raw(caption) #></span><#= scriptEnd #></td>
+        <td class="w-col-1"><#= searchOperatorScript #><span class="ew-search-operator"><#= FieldOperator() #></span><#= scriptEnd #></td>
+        <td <#= Code.raw(cellAttributes) #>>
+            <div class="text-nowrap">
+                <#= searchFieldScript #><span id="<#= spanId #>" class="ew-search-field"><#= FieldSearch() #></span><#= scriptEnd #><#= JavaScriptString #>
+        <#= searchConditionScript #>
+            <# if (fldSrchOpr2) { #>
+                <span class="ew-search-cond<#= initClass(!isBetween) #>"><#= FieldSearchCondition() #></span>
+            <# } #>
+            <# if (isBetween || isUserSelect) { #>
+                <span class="ew-search-and<#= initClass(isBetween) #>"><label><#= Code.raw(Code.languagePhrase("AND")) #></label></span>
+            <# } #>
+        <#= scriptEnd #>
+            <# if (fldSrchOpr2) { #>
+                <#= searchOperator2Script #><span class="ew-search-operator2<#= initClass(!isBetween) #>"><#= FieldOperator2() #></span><#= scriptEnd #>
+            <# } #>
+            <# if (fldSrchOpr2 || isBetween || isUserSelect) { #>
+                <#= searchField2Script #><span id="<#= spanId2 #>" class="ew-search-field2<#= initClass(isBetween || fldSrchOpr2) #>"><#= FieldSearch2() #></span><#= scriptEnd #><#= JavaScriptString #>
+            <# } #>
+            </div>
+        </td>
+    </tr>
+<?php } ?>
+<# } #>
+
+<?php } ?>
+<#
+    }
+#>

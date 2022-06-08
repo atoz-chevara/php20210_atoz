@@ -1,0 +1,52 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+<?php namespace <#= ProjectNamespace #>; ?>
+<form id="ew-email-form" class="ew-horizontal ew-form ew-email-form" action="<#= Code.write(Code.CurrentPageUrl(false)) #>"<#= formNoValidate #>>
+
+<## Token tag #>
+<#= include('shared/token-tag.html') #>
+
+<input type="hidden" name="export" id="export" value="email">
+    <div class="form-group row">
+        <label class="<#= labelClass #>" for="sender"><#= Code.raw(Code.languagePhrase("EmailFormSender")) #></label>
+        <div class="<#= rightColumnClass #>">
+            <input type="text" class="<#= inputClass #>" name="sender" id="sender">
+            <div class="invalid-feedback"></div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="<#= labelClass #>" for="recipient"><#= Code.raw(Code.languagePhrase("EmailFormRecipient")) #></label>
+        <div class="<#= rightColumnClass #>">
+            <input type="text" class="<#= inputClass #>" name="recipient" id="recipient">
+            <div class="invalid-feedback"></div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="<#= labelClass #>" for="cc"><#= Code.raw(Code.languagePhrase("EmailFormCc")) #></label>
+        <div class="<#= rightColumnClass #>">
+            <input type="text" class="<#= inputClass #>" name="cc" id="cc">
+            <div class="invalid-feedback"></div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="<#= labelClass #>" for="bcc"><#= Code.raw(Code.languagePhrase("EmailFormBcc")) #></label>
+        <div class="<#= rightColumnClass #>">
+            <input type="text" class="<#= inputClass #>" name="bcc" id="bcc">
+            <div class="invalid-feedback"></div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="<#= labelClass #>" for="subject"><#= Code.raw(Code.languagePhrase("EmailFormSubject")) #></label>
+        <div class="<#= rightColumnClass #>">
+            <input type="text" class="<#= inputClass #>" name="subject" id="subject">
+            <div class="invalid-feedback"></div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="<#= labelClass #>" for="message"><#= Code.raw(Code.languagePhrase("EmailFormMessage")) #></label>
+        <div class="<#= rightColumnClass #>">
+            <textarea class="<#= inputClass #>" rows="6" name="message" id="message"></textarea>
+            <div class="invalid-feedback"></div>
+        </div>
+    </div>
+</form>

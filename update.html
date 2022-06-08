@@ -1,0 +1,186 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+
+<## Common table config #>
+<#= include('shared/config-table.php') #>
+
+<## Page load #>
+<#= include('shared/page-load.php') #>
+
+<## Local JavaScript #>
+<#= include('shared/local.js') #>
+
+<## Client JavaScript #>
+<#= include('shared/client.js') #>
+
+<## Page header #>
+<#= include('shared/page-header.html') #>
+
+<## Show message #>
+<#= include('shared/show-message.html') #>
+
+<#
+    let disabled = multiUpdateConfirm ? Code.write(Code.getName(pageObj, "Disabled")) : "";
+#>
+
+<form name="<#= formName #>" id="<#= formName #>" class="<#= Code.write(formClassName) #>" action="<#= Code.write(Code.CurrentPageUrl(false)) #>" method="post"<#= formNoValidate #>>
+
+<## Token tag #>
+<#= include('shared/token-tag.html') #>
+
+<input type="hidden" name="t" value="<#= tblVar #>">
+<# if (multiUpdateConfirm) { #>
+<?php if (<#= isConfirm #>) { // Confirm page ?>
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="confirm" id="confirm" value="confirm">
+<?php } else { ?>
+<input type="hidden" name="action" id="action" value="confirm">
+<?php } ?>
+<# } else { #>
+<input type="hidden" name="action" id="action" value="update">
+<# } #>
+
+<input type="hidden" name="modal" value="<#= Code.write(Code.castInt(isModal)) #>">
+
+<?php foreach ($<#= pageObj #>->RecKeys as $key) { ?>
+<?php $keyvalue = is_array($key) ? implode(Config("COMPOSITE_KEY_SEPARATOR"), $key) : $key; ?>
+<input type="hidden" name="key_m[]" value="<?= HtmlEncode($keyvalue) ?>">
+<?php } ?>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (!<#= isMobileOrModal #>) { ?>
+<div class="ew-desktop"><!-- desktop -->
+<?php } ?>
+<# } #>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (<#= isMobileOrModal #>) { ?>
+<div id="<#= tableIdBase #>" class="<#= tableClass #>"><!-- page -->
+    <?php if (!<#= isConfirm #>) { // Confirm page ?>
+    <div class="custom-control custom-checkbox">
+        <input type="checkbox" class="custom-control-input" name="u" id="u" onclick="ew.selectAll(this);"<#= disabled #>><label class="custom-control-label" for="u"><#= Code.raw(Code.languagePhrase("UpdateSelectAll")) #></label>
+    </div>
+    <?php } ?>
+<?php } else { ?>
+<table id="<#= tableIdBase #>" class="<#= desktopTableClass #>"><!-- desktop table -->
+    <?php if (!<#= isConfirm #>) { // Confirm page ?>
+    <thead>
+    <tr>
+        <th colspan="2"><div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input" name="u" id="u" onclick="ew.selectAll(this);"<#= disabled #>><label class="custom-control-label" for="u"><#= Code.raw(Code.languagePhrase("UpdateSelectAll")) #></label></div></th>
+    </tr>
+    </thead>
+    <?php } ?>
+    <tbody>
+<?php } ?>
+<# } else { #>
+<div id="<#= tableIdBase #>" class="<#= tableClass #>"><!-- page -->
+    <?php if (!<#= isConfirm #>) { // Confirm page ?>
+    <div class="custom-control custom-checkbox">
+        <input type="checkbox" class="custom-control-input" name="u" id="u" onclick="ew.selectAll(this);"<#= disabled #>><label class="custom-control-label" for="u"><#= Code.raw(Code.languagePhrase("UpdateSelectAll")) #></label>
+    </div>
+    <?php } ?>
+<# } #>
+
+<#
+        for (let f of currentFields) {
+            if (f.FldHtmlTag != "HIDDEN" && !(f.FldIsPrimaryKey && f.FldAutoIncrement) && !f.FldHtmlTagReadOnly) {
+                FIELD = f;
+                let fldParm = f.FldParm,
+                    fldVar = f.FldVar,
+                    fldObj = Code.fldObj(),
+                    fldName = FIELD.FldName,
+                    headerSpanId = "elh_" + tblVar + "_" + fldParm,
+                    forLabel = UseForLabel(f) ? ` for="${fldVar}"` : "",
+                    visible = Code.getName(fldObj, Code.Field.Visible),
+                    selected = Code.getName(fldObj, Code.Field.MultiUpdateSelected),
+                    cellAttributes = Code.getName(fldObj, Code.Field.CellAttributes);
+#>
+<?php if (<#= visible #> && (!<#= isConfirm #> || <#= selected #>)) { // <#= fldName #> ?>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (<#= isMobileOrModal #>) { ?>
+<# } #>
+    <div id="r_<#= fldParm #>" class="form-group row">
+        <label<#= forLabel #> class="<#= Code.write(pageLeftColumnClass) #>">
+            <#= FieldUpdate() #>
+        </label>
+        <div class="<#= Code.write(pageRightColumnClass) #>">
+            <div <#= Code.raw(cellAttributes) #>>
+                <#= FieldEdit() #>
+            </div>
+        </div>
+    </div>
+<# if (useTabularFormForDesktop) { #>
+<?php } else { ?>
+    <tr id="r_<#= fldParm #>">
+        <td class="<#= Code.write(pageTableLeftColumnClass) #>" <#= Code.raw(cellAttributes) #>>
+            <span id="<#= headerSpanId #>">
+                <#= FieldUpdate() #>
+            </span>
+        </td>
+        <td <#= Code.raw(cellAttributes) #>>
+            <#= FieldEdit() #>
+        </td>
+    </tr>
+<?php } ?>
+<# } #>
+
+<?php } ?>
+<#
+            }
+        } // Field
+#>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (<#= isMobileOrModal #>) { ?>
+    </div><!-- /page -->
+<?php } else { ?>
+    </tbody>
+</table><!-- /desktop table -->
+<?php } ?>
+<# } else { #>
+</div><!-- /page -->
+<# } #>
+
+<?php if (!<#= isModal #>) { ?>
+
+    <div class="form-group row"><!-- buttons .form-group -->
+        <div class="<#= Code.write(pageOffsetColumnClass) #>"><!-- buttons offset -->
+
+<# if (multiUpdateConfirm) { #>
+<?php if (!<#= isConfirm #>) { // Confirm page ?>
+<button class="<#= submitButtonClass #>" name="btn-action" id="btn-action" type="submit"<#= confirmButtonSubmit #>><#= Code.raw(Code.languagePhrase("UpdateBtn")) #></button>
+<button class="<#= cancelButtonClass #>" name="btn-cancel" id="btn-cancel" type="button" data-href="<#= Code.writePath(returnUrl) #>"><#= Code.raw(Code.languagePhrase("CancelBtn")) #></button>
+<?php } else { ?>
+<button class="<#= submitButtonClass #>" name="btn-action" id="btn-action" type="submit"><#= Code.raw(Code.languagePhrase("ConfirmBtn")) #></button>
+<button class="<#= cancelButtonClass #>" name="btn-cancel" id="btn-cancel" type="submit"<#= cancelButtonSubmit #>><#= Code.raw(Code.languagePhrase("CancelBtn")) #></button>
+<?php } ?>
+<# } else { #>
+<button class="<#= submitButtonClass #>" name="btn-action" id="btn-action" type="submit"><#= Code.raw(Code.languagePhrase("UpdateBtn")) #></button>
+<button class="<#= cancelButtonClass #>" name="btn-cancel" id="btn-cancel" type="button" data-href="<#= Code.writePath(returnUrl) #>"><#= Code.raw(Code.languagePhrase("CancelBtn")) #></button>
+<# } #>
+
+        </div><!-- /buttons offset -->
+    </div><!-- /buttons .form-group -->
+
+<?php } ?>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (!<#= isMobileOrModal #>) { ?>
+</div><!-- /desktop -->
+<?php } ?>
+<# } #>
+
+</form>
+
+<## Page footer #>
+<#= include('shared/page-footer.html') #>
+
+<## User events #>
+<#= include('shared/user-events.html') #>
+
+<## Startup JavaScript #>
+<#= include('shared/startup.js') #>
+
+<## Page unload #>
+<#= include('shared/page-unload.php') #>

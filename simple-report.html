@@ -1,0 +1,65 @@
+<## Load groups start #>
+<#= include('shared/report-load-groups-script-start.php') #>
+
+<?php
+    // Show header
+    if (<#= showHeader #>) {
+?>
+
+<## Report header #>
+<#= include('shared/report-head.html') #>
+
+<thead>
+<## Report header row #>
+<#= include('./summary-header-row.html') #>
+</thead>
+<tbody>
+
+<?php
+        if (<#= totalGrps #> == 0) {
+            break; // Show header only
+        }
+        <#= showHeader #> = false;
+    } // End show header
+?>
+
+<## Load details start #>
+<#= include('shared/report-load-details-script-start.php') #>
+
+<# if (showDetails) { // Show details #>
+
+<## Detail row #>
+<#= include('./summary-detail-row.html') #>
+
+<# } // End show detail #>
+
+<## Load details end #>
+<#= include('shared/report-load-details-script-end.php') #>
+
+<## Load groups end #>
+<#= include('shared/report-load-groups-script-end.php') #>
+
+<?php if (<#= totalGrps #> > 0) { ?>
+
+</tbody>
+<tfoot>
+
+<# if (TABLE.TblRptShowPageTotal) { #>
+
+<## Summary page total #>
+<#= include('./summary-page-total.html') #>
+
+<# } // End show page total #>
+
+<# if (TABLE.TblRptShowGrandTotal) { #>
+
+<## Summary grand total #>
+<#= include('./summary-grand-total.html') #>
+
+<# } // End show grand total #>
+
+</tfoot>
+
+<#= include('shared/report-foot.html') #>
+
+<?php } ?>

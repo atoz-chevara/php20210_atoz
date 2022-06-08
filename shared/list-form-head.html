@@ -1,0 +1,47 @@
+<# if (ctrlId == "grid") { #>
+
+<div id="<#= formName #>" class="ew-form ew-list-form form-inline">
+
+<# } else { #>
+
+    <# if (recPerRow < 1) { // Single Column #>
+<form name="<#= formName #>" id="<#= formName #>" class="form-inline ew-form ew-list-form" action="<#= Code.write(Code.CurrentPageUrl(false)) #>" method="post"<#= formNoValidate #>>
+    <# } else { // Multiple Column #>
+<form name="<#= formName #>" id="<#= formName #>" class="ew-horizontal ew-form ew-list-form ew-multi-column-form" action="<#= Code.write(Code.CurrentPageUrl(false)) #>" method="post"<#= formNoValidate #>>
+    <# } #>
+
+<## Token tag #>
+<#= include('shared/token-tag.html') #>
+
+<input type="hidden" name="t" value="<#= tblVar #>">
+
+    <# if (exportSelectedOnly) { #>
+<input type="hidden" name="exporttype" id="exporttype" value="">
+    <# } #>
+
+    <#
+    for (let md of masterTables) {
+        let masterTable = GetTableObject(md.MasterTable),
+            masterTblVar = masterTable.TblVar;
+    #>
+<?php if (<#= currentMasterTable #> == "<#= masterTblVar #>" && <#= currentAction #>) { ?>
+<input type="hidden" name="<#= Code.write(Code.Config.TableShowMaster) #>" value="<#= masterTblVar #>">
+    <#
+        for (let rel of md.Relations) {
+            let masterField = GetFieldObject(masterTable, rel.MasterField),
+                masterFldParm = masterField.FldParm,
+                detailField = GetFieldObject(TABLE, rel.DetailField),
+                detailFldParm = detailField.FldParm,
+                detailFldObj = Code.fldObj(detailField),
+                sessionValue = Code.getName(detailFldObj, Code.Field.SessionValue);
+    #>
+<input type="hidden" name="fk_<#= masterFldParm #>" value="<#= Code.write(Code.htmlEncode(sessionValue)) #>">
+    <#
+        } // MasterDetailField
+    #>
+<?php } ?>
+    <#
+    } // MasterDetail
+    #>
+
+<# } #>

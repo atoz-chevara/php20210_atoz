@@ -1,0 +1,12 @@
+<#
+    let fldParm = FIELD.FldParm, fldObj = Code.fldObj(), fldName = FIELD.FldName,
+        headerSpanId = "elh_" + tblVar + "_" + fldParm,
+        visible = Code.getName(fldObj, Code.Field.Visible),
+        cellAttributes = Code.getName(fldObj, Code.Field.CellAttributes);
+#>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+    <tr id="r_<#= fldParm #>">
+        <td class="<#= Code.write(pageTableLeftColumnClass) #>"><span id="<#= headerSpanId #>"><#= FieldCaption() #></span></td>
+        <td data-name="<#= fldParm #>" <#= Code.raw(cellAttributes) #>><#= FieldView() #></td>
+    </tr>
+<?php } ?>

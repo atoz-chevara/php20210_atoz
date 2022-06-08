@@ -1,0 +1,30 @@
+<# if (ctrlId == "grid") { #>
+
+<?php if ($<#= pageObj #>->ShowOtherOptions) { ?>
+<div class="card-header ew-grid-upper-panel">
+<?php $<#= pageObj #>->OtherOptions->render("body") ?>
+</div>
+<div class="clearfix"></div>
+<?php } ?>
+
+<# } else { #>
+
+<#= exportStart #>
+    <# if (recPerRow < 1) { // Single Column #>
+<div class="card-header ew-grid-upper-panel">
+    <# } else { // Multiple Column #>
+<div>
+    <# } #>
+<?php if (!<#= isGridAdd #>) { ?>
+<form name="ew-pager-form" class="form-inline ew-form ew-pager-form" action="<#= Code.write(Code.CurrentPageUrl(false)) #>">
+<#= Code.raw(renderPager) #>
+</form>
+<?php } ?>
+<div class="ew-list-other-options">
+<?php $<#= pageObj #>->OtherOptions->render("body") ?>
+</div>
+<div class="clearfix"></div>
+</div>
+<#= exportEnd #>
+
+<# } #>

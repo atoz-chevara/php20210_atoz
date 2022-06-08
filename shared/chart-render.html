@@ -1,0 +1,111 @@
+<## config chart #>
+<#= include('./config-chart.php') #>
+<?php
+<#
+    let pageBreakType = chartPageBreakTypes[chartVar],
+        chartClass = pageBreakType == "before" ? "ew-chart-bottom" : "ew-chart-top",
+        pageBreakCheck = `($${pageObj}->isExport("print") || $${pageObj}->isExport("pdf") || $${pageObj}->isExport("email") || $${pageObj}->isExport("excel") && Config("USE_PHPEXCEL") || $${pageObj}->isExport("word") && Config("USE_PHPWORD"))`;
+
+    if (isDashBoard) {
+
+        let sourceTable = GetTableObject(dashboardItem.SourceTable),
+            sourceChart = GetChartObject(sourceTable, dashboardItem.SourceChart),
+            isCrosstabChart = sourceTable.TblReportType == "crosstab",
+            hasSourceReport = sourceTable.TblGen,
+            chartHasUserIdFld = (hasUserId && !IsEmpty(sourceTable.TblUserIDFld)),
+            chartClickUrl = GetRouteUrl(sourceTable.TblType == "REPORT" ? sourceTable.TblReportType : "list", sourceTable);
+        chartTblVar = sourceTable.TblVar;
+        chartVar = sourceChart.ChartVar;
+        chartWidth = dashboardItem.ChartWidth;
+        chartHeight = dashboardItem.ChartHeight;
+#>
+
+$<#= chartTblVar #> = Container("<#= chartTblVar #>");
+$<#= chartTblVar #>-><#= chartVar #>->Width = <#= chartWidth #>;
+$<#= chartTblVar #>-><#= chartVar #>->Height = <#= chartHeight #>;
+
+<# if (isCrosstabChart) { #>
+    <# if (chartHasUserIdFld) { #>
+$<#= chartTblVar #>->loadColumnValues($<#= chartTblVar #>->applyUserIDFilters($<#= chartTblVar #>->CurrentFilter));
+    <# } else { #>
+$<#= chartTblVar #>->loadColumnValues($<#= chartTblVar #>->CurrentFilter);
+    <# } #>
+<# } #>
+
+<# if (hasSourceReport) { #>
+$<#= chartTblVar #>-><#= chartVar #>->setParameter("clickurl", "<#= Quote(chartClickUrl) #>"); // Add click URL
+<# } #>
+
+<#
+    }
+#>
+
+<# if (isDashBoard) { #>
+
+$<#= chartTblVar #>-><#= chartVar #>->DrillDownUrl = ""; // No drill down for dashboard
+$<#= chartTblVar #>-><#= chartVar #>->render("<#= chartClass #>");
+
+<# } else { #>
+
+if (!$DashboardReport) {
+
+    // Set up page break
+    if (<#= pageBreakCheck #> && $<#= pageObj #>->ExportChartPageBreak) {
+    <# if (ServerScriptExist(eventCtrlType, "Page_Breaking")) { #>
+        // Page_Breaking server event
+        $<#= pageObj #>->pageBreaking($<#= pageObj #>->ExportChartPageBreak, $<#= pageObj #>->PageBreakContent);
+    <# } #>
+        // Set up chart page break
+        $<#= pageObj #>-><#= chartVar #>->PageBreakType = "<#= pageBreakType #>"; // Page break type
+        $<#= pageObj #>-><#= chartVar #>->PageBreak = $<#= pageObj #>->ExportChartPageBreak;
+        $<#= pageObj #>-><#= chartVar #>->PageBreakContent = $<#= pageObj #>->PageBreakContent;
+    }
+
+    // Set up chart drilldown
+    $<#= pageObj #>-><#= chartVar #>->DrillDownInPanel = $<#= pageObj #>->DrillDownInPanel;
+
+<#
+    if (IsChartDrillDown(CHART)) {
+        let drillTable = GetTableObject(CHART.ChartDrillTable),
+            sourceFlds = CHART.ChartDrillSourceFields.split("||"),
+            targetFlds = CHART.ChartDrillTargetFields.split("||");
+        if (sourceFlds.length == targetFlds.length) {
+#>
+    // Update chart drill down URL from filter
+<#
+            let j = 0, mapSourceTarget = ArrayCombine(sourceFlds, targetFlds);
+            for (let [sourceFld, targetFld] of mapSourceTarget.entries()) {
+                let sourceField = GetFieldObject(TABLE, sourceFld),
+                    sourceFldName = sourceField.FldName,
+                    sourceFldObj = GetPageObject() + Code.dot + sourceField.FldParm,
+                    targetField = GetFieldObject(drillTable, targetFld),
+                    targetFldParm = targetField.FldParm;
+                if (sourceFldName != chartXFldName && sourceFldName != chartSFldName) { // NOT X Axis/Series Field
+                    let rowtype = 0, parm = -1;
+                    if (columnField && sourceFldName == columnField.FldName && columnDateFieldName != "") { // Column date field
+                        parm = 0;
+                    }
+#>
+    $<#= pageObj #>-><#= chartVar #>->DrillDownUrl = str_replace("=f<#= j #>", "=" . Encrypt($<#= pageObj #>->getDrillDownSql($<#= sourceFldObj #>, "<#= targetFldParm #>", <#= rowtype #>, <#= parm #>)), $<#= pageObj #>-><#= chartVar #>->DrillDownUrl);
+<#
+                }
+                j++;
+            }
+        }
+    }
+#>
+
+    $<#= pageObj #>-><#= chartVar #>->render("<#= chartClass #>");
+
+}
+
+<# } #>
+?>
+
+<# if (CHART.ChartPosition == 4 && !isDashBoard) { #>
+<?php if (!$DashboardReport && !$<#= pageObj #>->isExport("email") && !$<#= pageObj #>->DrillDown && $<#= pageObj #>-><#= chartVar #>->hasData()) { ?>
+<#= exportStart #>
+<div class="mb-3"><a href="#" class="ew-top-link" onclick="$(document).scrollTop($('#top').offset().top); return false;"><#= Code.raw(Code.languagePhrase("Top")) #></a></div>
+<#= exportEnd #>
+<?php } ?>
+<# } #>

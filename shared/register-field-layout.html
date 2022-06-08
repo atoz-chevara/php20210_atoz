@@ -1,0 +1,71 @@
+<#
+    if (!FIELD.FldAutoIncrement && IsEmpty(FIELD.FldAutoUpdateValue)) {
+        // Skip User Level Field, Activate Field and Hidden Field
+        if (FIELD.FldName != DB.SecUserLevelFld &&
+            FIELD.FldName != activateFldName &&
+            !(FIELD.FldHtmlTag == "HIDDEN" && !IsEmpty(FIELD.FldDefault))) {
+            let fldName = FIELD.FldName, fldParm = FIELD.FldParm,
+                fldVar = FIELD.FldVar, fldObj = Code.fldObj(),
+                headerSpanId = "elh_" + tblVar + "_" + fldParm,
+                forLabel = UseForLabel(FIELD) ? ` for="${fldVar}"` : "",
+                visible = Code.getName(fldObj, Code.Field.Visible),
+                cellAttributes = Code.getName(fldObj, Code.Field.CellAttributes);
+#>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (<#= isMobileOrModal #>) { ?>
+<# } #>
+
+    <div id="r_<#= fldParm #>" class="form-group row">
+        <label id="<#= headerSpanId #>"<#= forLabel #> class="<#= Code.write(pageLeftColumnClass) #>"><#= FieldCaption() #></label>
+        <div class="<#= Code.write(pageRightColumnClass) #>"><div <#= Code.raw(cellAttributes) #>><#= FieldAdd() #></div></div>
+    </div>
+
+<# if (useTabularFormForDesktop) { #>
+<?php } else { ?>
+    <tr id="r_<#= fldParm #>">
+        <td class="<#= Code.write(pageTableLeftColumnClass) #>"><span id="<#= headerSpanId #>"><#= FieldCaption() #></span></td>
+        <td <#= Code.raw(cellAttributes) #>><#= FieldAdd() #></td>
+    </tr>
+<?php } ?>
+<# } #>
+
+<?php } ?>
+<#
+            if (FIELD.FldName == PROJ.SecPasswdFld) { // Generate Confirm Password Field
+                let args = { parm: "confirm" }, // Confirm password field
+                    headerSpanId = "elh_c_" + tblVar + "_" + fldParm;
+                forLabel = UseForLabel(FIELD) ? ` for="c_${fldParm}"` : "";
+#>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (<#= isMobileOrModal #>) { ?>
+<# } #>
+
+    <div id="r_c_<#= fldParm #>" class="form-group row">
+        <label id="<#= headerSpanId #>"<#= forLabel #> class="<#= Code.write(pageLeftColumnClass) #>"><#= FieldCaption(args) #></label>
+        <div class="<#= Code.write(pageRightColumnClass) #>"><div <#= Code.raw(cellAttributes) #>><#= FieldAdd(args) #></div></div>
+    </div>
+
+<# if (useTabularFormForDesktop) { #>
+<?php } else { ?>
+    <tr id="r_c_<#= fldParm #>">
+        <td class="<#= Code.write(pageTableLeftColumnClass) #>"><span id="<#= headerSpanId #>" class="ew-confirm-password"><#= FieldCaption(args) #></span></td>
+        <td <#= Code.raw(cellAttributes) #>><#= FieldAdd(args) #></td>
+    </tr>
+<?php } ?>
+<# } #>
+
+<?php } ?>
+<#
+            }
+        // Hidden field
+        } else if (FIELD.FldHtmlTag == "HIDDEN" && !IsEmpty(FIELD.FldDefault)) {
+#>
+    <#= FieldAdd() #>
+<#
+        }
+    }
+#>

@@ -1,0 +1,185 @@
+<#
+    let lvl = groupIndex + 1,
+        groupField = groupFields[groupIndex],
+        lvlGrpFldObj = Code.fldObj(groupField);
+#>
+<?php
+    <#
+        for (let dtlFld of detailFields) {
+            let fldName = dtlFld.FldName,
+                fldObj = Code.fldObj(dtlFld),
+                fldParm = dtlFld.FldParm,
+                smryTypes = dtlFld.SummaryTypes;
+            for (let smryType of smryTypes) {
+    #>
+    $<#= fldObj #>->get<#= smryType #>($<#= lvlGrpFldObj #>->Records); // Get <#= smryType #>
+    <#
+            } // End for sryType
+        }; // End for dtlFld
+    #>
+    $<#= pageObj #>->resetAttributes();
+    $<#= pageObj #>->RowType = ROWTYPE_TOTAL;
+    $<#= pageObj #>->RowTotalType = ROWTOTAL_GROUP;
+    $<#= pageObj #>->RowTotalSubType = ROWTOTAL_FOOTER;
+    $<#= pageObj #>->RowGroupLevel = <#= lvl #>;
+    $<#= pageObj #>->renderRow();
+?>
+
+<?php if ($<#= lvlGrpFldObj #>->ShowCompactSummaryFooter) { ?>
+
+<# if (!hasSummaryFields) { #>
+    <?php if (!$<#= lvlGrpFldObj #>->ShowGroupHeaderAsRow) { ?>
+<# } #>
+
+    <tr<?= $<#= pageObj #>->rowAttributes(); ?>>
+<#
+    groupFields.forEach((grpFld, j) => {
+        let fldName = grpFld.FldName,
+            grpFldObj = Code.fldObj(grpFld),
+            fldParm = grpFld.FldParm,
+            grpFldObj2 = (j > lvl - 1) ? lvlGrpFldObj : grpFldObj;
+        FIELD = grpFld;
+#>
+<?php if ($<#= grpFldObj #>->Visible) { ?>
+        <td data-field="<#= fldParm #>"<?= $<#= grpFldObj2 #>->cellAttributes() ?>>
+    <?php if ($<#= grpFldObj #>->ShowGroupHeaderAsRow) { ?>
+        &nbsp;
+    <?php } elseif ($<#= pageObj #>->RowGroupLevel != <#= j + 1 #>) { ?>
+        <# if (!showDetails) { #>
+        <#= FieldSummaryGroupView() #>
+        <# } else { #>
+        &nbsp;
+        <# } #>
+    <?php } else { ?>
+        <# if (showDetails || j + 1 != groupFields.length) { #>
+        <span class="ew-summary-count"><span class="ew-aggregate-caption"><?= $Language->phrase("RptCnt") ?></span><?= $Language->phrase("AggregateEqual") ?><span class="ew-aggregate-value"><?= FormatNumber($<#= grpFldObj #>->Count, 0); ?></span></span>
+        <# } else { #>
+        <span class="ew-summary-count"><#= FieldGroupView() #>&nbsp;(<span class="ew-aggregate-caption"><?= $Language->phrase("RptCnt") ?></span><?= $Language->phrase("AggregateEqual") ?><span class="ew-aggregate-value"><?= FormatNumber($<#= grpFldObj #>->Count, 0); ?></span>)</span>
+        <# } #>
+    <?php } ?>
+        </td>
+<?php } ?>
+<#
+    }); // End for grpFld
+
+    for (let dtlFld of detailFields) {
+        let fldName = dtlFld.FldName,
+            fldObj = Code.fldObj(dtlFld),
+            fldParm = dtlFld.FldParm,
+            summaryName = "";
+        FIELD = dtlFld;
+        for (let summaryType of summaryTypes) {
+            if (SameText(summaryType, "Sum") && dtlFld.FldRptAggSum ||
+                SameText(summaryType, "Avg") && dtlFld.FldRptAggAvg ||
+                SameText(summaryType, "Min") && dtlFld.FldRptAggMin ||
+                SameText(summaryType, "Max") && dtlFld.FldRptAggMax ||
+                SameText(summaryType, "Cnt") && dtlFld.FldRptAggCnt) {
+                if (summaryName != "")
+                    summaryName += "<br>";
+                summaryName += `<span class="ew-aggregate-caption"><?= $Language->phrase("Rpt${summaryType}") ?></span><?= $Language->phrase("AggregateEqual") ?><span class="ew-aggregate-value">`;
+                summaryName += FieldSummaryView({ id: summaryType, lvl: lvl }).replace(/[\r\n]/g, "");
+                summaryName += "</span>";
+            }
+        } // End for summaryType
+#>
+<?php if ($<#= fldObj #>->Visible) { ?>
+        <td data-field="<#= fldParm #>"<?= $<#= lvlGrpFldObj #>->cellAttributes() ?>><#= summaryName #></td>
+<?php } ?>
+<#
+    }; // End for dtlFld
+#>
+    </tr>
+
+<# if (!hasSummaryFields) { #>
+    <?php } ?>
+<# } #>
+
+<?php } else { ?>
+
+    <tr<?= $<#= pageObj #>->rowAttributes(); ?>>
+<#
+    for (let j = 0; j < groupIndex; j++) {
+        let grpFld = groupFields[j],
+            fldName = grpFld.FldName,
+            grpFldObj = Code.fldObj(grpFld),
+            fldParm = grpFld.FldParm;
+        FIELD = grpFld;
+#>
+<?php if ($<#= grpFldObj #>->Visible) { ?>
+<# if (showDetails) { #>
+        <td data-field="<#= fldParm #>"<?= $<#= grpFldObj #>->cellAttributes() ?>>&nbsp;</td>
+<# } else { #>
+        <td data-field="<#= fldParm #>"<?= $<#= grpFldObj #>->cellAttributes() ?>><#= FieldSummaryGroupView() #></td>
+<# } #>
+<?php } ?>
+<#
+    } // End for j
+
+    let smryPrefix = "", smrySuffix = "", fldCount;
+    if (IsFieldDrillDown(groupField)) {
+        smryPrefix = `"<a" . $${lvlGrpFldObj}->linkAttributes() . ">" . `;
+        smrySuffix = ` . "</a>"`;
+    }
+    if (groupIndex == 0) {
+        fldCount = `$${pageObj}->GroupColumnCount + $${pageObj}->DetailColumnCount`;
+    } else {
+        fldCount = `$${pageObj}->SubGroupColumnCount + $${pageObj}->DetailColumnCount`;
+        if (groupIndex > 1)
+            fldCount += " - " + (groupIndex - 1);
+    }
+#>
+<?php if (<#= fldCount #> > 0) { ?>
+        <td colspan="<?= (<#= fldCount #>) ?>"<?= $<#= lvlGrpFldObj #>->cellAttributes() ?>><?= str_replace(["%v", "%c"], [<#= smryPrefix #>$<#= lvlGrpFldObj #>->GroupViewValue<#= smrySuffix #>, $<#= lvlGrpFldObj #>->caption()], $Language->phrase("RptSumHead")) ?> <span class="ew-dir-ltr">(<?= FormatNumber($<#= lvlGrpFldObj #>->Count, 0); ?><#= Code.raw(Code.languagePhrase("RptDtlRec")) #>)</span></td>
+<?php } ?>
+    </tr>
+<#
+    for (let summaryType of summaryTypes) {
+#>
+    <tr<?= $<#= pageObj #>->rowAttributes(); ?>>
+<#
+        for (let j = 0; j < groupIndex; j++) {
+            let gf = groupFields[j],
+                grpFldObj = Code.fldObj(gf),
+                fldParm = gf.FldParm;
+#>
+<?php if ($<#= grpFldObj #>->Visible) { ?>
+        <td data-field="<#= fldParm #>"<?= $<#= grpFldObj #>->cellAttributes() ?>>&nbsp;</td>
+<?php } ?>
+<#
+        } // End for j
+#>
+<?php if ($<#= pageObj #>->GroupColumnCount > 0) { ?>
+        <td colspan="<?= ($<#= pageObj #>->GroupColumnCount - <#= groupIndex #>) ?>"<?= $<#= lvlGrpFldObj #>->cellAttributes() ?>><?= $Language->phrase("Rpt<#= summaryType #>") ?></td>
+<?php } ?>
+<#
+        for (let dtlFld of detailFields) {
+            let fldName = dtlFld.FldName,
+                fldParm = dtlFld.FldParm,
+                fldObj = Code.fldObj(dtlFld);
+            FIELD = dtlFld;
+#>
+<?php if ($<#= fldObj #>->Visible) { ?>
+<#
+            if (SameText(summaryType, "Sum") && dtlFld.FldRptAggSum ||
+                SameText(summaryType, "Avg") && dtlFld.FldRptAggAvg ||
+                SameText(summaryType, "Min") && dtlFld.FldRptAggMin ||
+                SameText(summaryType, "Max") && dtlFld.FldRptAggMax ||
+                SameText(summaryType, "Cnt") && dtlFld.FldRptAggCnt) {
+#>
+        <td data-field="<#= fldParm #>"<?= $<#= fldObj #>->cellAttributes() ?>><#= FieldSummaryView({ id: summaryType, lvl: lvl }) #></td>
+<#
+            } else {
+#>
+        <td data-field="<#= fldParm #>"<?= $<#= lvlGrpFldObj #>->cellAttributes() ?>>&nbsp;</td>
+<#
+            }
+#>
+<?php } ?>
+<#
+        }
+#>
+    </tr>
+<#
+    } // End for summaryType
+#>
+<?php } ?>

@@ -1,0 +1,68 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+
+<## Common table config #>
+<#= include('shared/config-table.php') #>
+
+<## Page load #>
+<#= include('shared/page-load.php') #>
+
+<## Local JavaScript #>
+<#= include('shared/local.js') #>
+
+<## Client JavaScript #>
+<#= include('shared/client.js') #>
+
+<## Page header #>
+<#= include('shared/page-header.html') #>
+
+<form name="<#= formName #>" id="<#= formName #>" class="ew-form ew-horizontal" action="<#= Code.writePath(Code.Config.ApiUrl) #>" method="post"<#= formNoValidate #>>
+
+<## Token tag #>
+<#= include('shared/token-tag.html') #>
+
+<input type="hidden" name="<#= Code.write(Code.Config.ApiActionName) #>" id="<#= Code.write(Code.Config.ApiActionName) #>" value="<#= Code.write(Code.Config.ApiAddAction) #>">
+<input type="hidden" name="<#= Code.write(Code.Config.ApiObjectName) #>" id="<#= Code.write(Code.Config.ApiObjectName) #>" value="<#= tblVar #>">
+<input type="hidden" name="addopt" id="addopt" value="1">
+
+<#
+        for (let f of currentFields) {
+            FIELD = f;
+            let fldName = f.FldName, fldParm = f.FldParm,
+                fldVar = f.FldVar, fldObj = Code.fldObj(),
+                visible = Code.getName(fldObj, Code.Field.Visible);
+            if (!f.FldAutoIncrement && IsEmpty(f.FldAutoUpdateValue) && !(f.FldHtmlTag == "HIDDEN" && !IsEmpty(f.FldDefault))) {
+                let headerSpanId = "elh_" + tblVar + "_" + fldParm, forLabel = "";
+                if (UseForLabel(f))
+                    forLabel = ` for="${fldVar}"`;
+#>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+    <div class="form-group row">
+        <label class="<#= labelClass #>"<#= forLabel #>><#= FieldCaption() #></label>
+        <div class="<#= rightColumnClass #>"><#= FieldAdd() #></div>
+    </div>
+<?php } ?>
+<#
+            } else {
+#>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+    <#= FieldAdd() #>
+<?php } ?>
+<#
+            }
+        } // Field
+#>
+
+</form>
+
+<## Page footer #>
+<#= include('shared/page-footer.html') #>
+
+<## User events #>
+<#= include('shared/user-events.html') #>
+
+<## Startup JavaScript #>
+<#= include('shared/startup.js') #>
+
+<## Page unload #>
+<#= include('shared/page-unload.php') #>

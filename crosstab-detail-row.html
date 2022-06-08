@@ -1,0 +1,45 @@
+	<tr<?= $<#= pageObj #>->rowAttributes(); ?>>
+<#
+    for (let grpFld of groupFields) {
+        let fldName = grpFld.FldName,
+            fldParm = grpFld.FldParm,
+            fldObj = Code.fldObj(grpFld);
+#>
+<?php if ($<#= fldObj #>->Visible) { ?>
+<#
+        if (fldName == columnDateFieldName) {
+            let gv = Code.getName(fldObj, "GroupViewValue"),
+                ctl = `<?= ${gv} ?>`;
+#>
+        <!-- <#= fldName #> -->
+        <td data-field="<#= fldParm #>"<?= $<#= fldObj #>->cellAttributes(); ?>><span<?= $<#= fldObj #>->viewAttributes(); ?>><#= ctl #></span></td>
+<#
+        } else {
+            FIELD = grpFld;
+#>
+        <!-- <#= fldName #> -->
+        <td data-field="<#= fldParm #>"<?= $<#= fldObj #>->cellAttributes(); ?>><#= FieldGroupView() #></td>
+<#
+        }
+#>
+<?php } ?>
+<#
+    } // End for grpFld
+#>
+
+<!-- Dynamic columns begin -->
+<?php
+        $cntcol = count($<#= pageObj #>->SummaryViewValues);
+        for ($iy = 1; $iy <= $cntcol; $iy++) {
+            $colShow = ($iy <= $<#= pageObj #>->ColumnCount) ? $<#= pageObj #>->Columns[$iy]->Visible : true;
+            $colDesc = ($iy <= $<#= pageObj #>->ColumnCount) ? $<#= pageObj #>->Columns[$iy]->Caption : $Language->phrase("Summary");
+            if ($colShow) {
+?>
+        <!-- <?= $colDesc; ?> -->
+        <td<?= $<#= pageObj #>->summaryCellAttributes($iy-1) ?>><?= $<#= pageObj #>->renderSummaryFields($iy-1) ?></td>
+<?php
+            }
+        }
+?>
+<!-- Dynamic columns end -->
+    </tr>

@@ -1,0 +1,27 @@
+<# if (ctrlId == "list") { #>
+
+<#
+    if (masterTables.length > 0) {
+#>
+<#= masterExportStart #>
+<#
+        for (let md of masterTables) {
+            let masterTable = GetTableObject(md.MasterTable),
+                masterTblVar = masterTable.TblVar;
+#>
+<?php
+if ($<#= pageObj #>->DbMasterFilter != "" && <#= currentMasterTable #> == "<#= masterTblVar #>") {
+    if ($<#= pageObj #>->MasterRecordExists) {
+        <#= IncludeFile("master", false, CONTROL, masterTable) #>
+    }
+}
+?>
+<#
+        } // MasterDetail
+#>
+<#= masterExportEnd #>
+<#
+    }
+#>
+
+<# } #>

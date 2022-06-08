@@ -1,0 +1,142 @@
+<#
+    let currentDetailTable = Code.getName(pageObj, Code.CurrentDetailTable),
+        navStyle = Code.getName(pageObj, Code.DetailPages, Code.NavStyle);
+
+    if (showMultiPageForDetails) {
+#>
+<?php if (<#= currentDetailTable #> != "") { ?>
+<?php
+    $<#= pageObj #>->DetailPages->ValidKeys = explode(",", <#= currentDetailTable #>);
+    $firstActiveDetailTable = $<#= pageObj #>->DetailPages->activePageIndex();
+?>
+<div class="ew-detail-pages"><!-- detail-pages -->
+<# if (useAccordionForMultiPage) { #>
+<div class="accordion ew-accordion" id="<#= pageObj #>_details"><!-- accordion -->
+<# } else { #>
+<div class="ew-nav-tabs" id="<#= pageObj #>_details"><!-- tabs -->
+    <ul class="<#= Code.write(navStyle) #>"><!-- .nav -->
+<#
+        let detailProp = "";
+        for (let md of detailTables) {
+            let detailTable = GetTableObject(md.DetailTable),
+                detailTblVar = detailTable.TblVar;
+            if (ctrlId == "view") {
+                detailProp = Code.getName(detailTblVar, "DetailView");
+            } else if (ctrlId == "edit") {
+                detailProp = Code.getName(detailTblVar, "DetailEdit");
+            } else if (ctrlId == "add") {
+                detailProp = Code.getName(detailTblVar, "DetailAdd");
+            }
+            if (detailTable.TblType != "REPORT") {
+                let detailStyle = Code.getName(pageObj, Code.DetailPages, Code.pageStyle(DoubleQuote(detailTblVar))),
+                    detailCaption = Code.languageTableCaption(detailTblVar),
+                    detailCount = Code.replace(Code.languagePhrase("DetailCount"), '"%c"', `Container("${detailTblVar}")->Count`);
+#>
+<?php
+    if (in_array("<#= detailTblVar #>", explode(",", <#= currentDetailTable #>)) && <#= detailProp #>) {
+        if ($firstActiveDetailTable == "" || $firstActiveDetailTable == "<#= detailTblVar #>") {
+            $firstActiveDetailTable = "<#= detailTblVar #>";
+        }
+?>
+<# if (showDetailCount && ctrlId == "view") { #>
+        <li class="nav-item"><a class="nav-link <#= Code.raw(detailStyle) #>" href="#tab_<#= detailTblVar #>" data-toggle="tab"><#= Code.raw(detailCaption) #>&nbsp;<#= Code.write(detailCount) #></a></li>
+<# } else { #>
+        <li class="nav-item"><a class="nav-link <#= Code.raw(detailStyle) #>" href="#tab_<#= detailTblVar #>" data-toggle="tab"><#= Code.raw(detailCaption) #></a></li>
+<# } #>
+<?php
+    }
+?>
+<#
+            }
+        }
+#>
+    </ul><!-- /.nav -->
+    <div class="tab-content"><!-- .tab-content -->
+<#
+        }
+    }
+
+    if ((ctrlId == "view" && isDetailView || ctrlId == "edit" && isDetailEdit ||
+        ctrlId == "add" && isDetailAdd) && detailTables.length > 0) {
+        let detailProp = "";
+        for (let md of detailTables) {
+            let detailTable = GetTableObject(md.DetailTable),
+                detailTblVar = detailTable.TblVar,
+                detailGridPage = GetFileName("grid", "", false, detailTable);
+            if (ctrlId == "view") {
+                detailProp = Code.getName(detailTblVar, "DetailView");
+            } else if (ctrlId == "edit") {
+                detailProp = Code.getName(detailTblVar, "DetailEdit");
+            } else if (ctrlId == "add") {
+                detailProp = Code.getName(detailTblVar, "DetailAdd");
+            }
+            if (detailTable.TblType != "REPORT") {
+                let detailStyle = Code.getName(pageObj, Code.DetailPages, Code.pageStyle(DoubleQuote(detailTblVar))),
+                    detailCaption = Code.languageTableCaption(detailTblVar),
+                    detailCount = Code.replace(Code.languagePhrase("DetailCount"), '"%c"', `Container("${detailTblVar}")->Count`),
+                    isActive = Code.getName(pageObj, Code.DetailPages, Code.isActive(DoubleQuote(detailTblVar)));
+#>
+<?php
+    if (in_array("<#= detailTblVar #>", explode(",", <#= currentDetailTable #>)) && <#= detailProp #>) {
+<# if (showMultiPageForDetails) { #>
+        if ($firstActiveDetailTable == "" || $firstActiveDetailTable == "<#= detailTblVar #>") {
+            $firstActiveDetailTable = "<#= detailTblVar #>";
+        }
+<# } #>
+?>
+<# if (!showMultiPageForDetails) { #>
+<?php if (<#= currentDetailTable #> != "") { ?>
+<# if (showDetailCount && ctrlId == "view") { #>
+<h4 class="ew-detail-caption"><#= Code.raw(detailCaption) #>&nbsp;<#= Code.write(detailCount) #></h4>
+<# } else { #>
+<h4 class="ew-detail-caption"><#= Code.raw(detailCaption) #></h4>
+<# } #>
+<?php } ?>
+<# } #>
+<# if (showMultiPageForDetails) { #>
+    <# if (useAccordionForMultiPage) { #>
+    <div class="card ew-accordion-card <#= Code.raw(detailStyle) #>">
+        <div class="card-header">
+            <h4 class="card-title">
+<# if (showDetailCount && ctrlId == "view") { #>
+                <a data-toggle="collapse" role="button" class="collapsed" aria-expanded="<#= Code.write(Code.jsonEncode(isActive)) #>" data-parent="#<#= pageObj #>_details" href="#tab_<#= detailTblVar #>"><#= Code.raw(detailCaption) #>&nbsp;<#= Code.write(detailCount) #></a>
+<# } else { #>
+                <a data-toggle="collapse" role="button" class="collapsed" aria-expanded="<#= Code.write(Code.jsonEncode(isActive)) #>" data-parent="#<#= pageObj #>_details" href="#tab_<#= detailTblVar #>"><#= Code.raw(detailCaption) #></a>
+<# } #>
+            </h4>
+        </div>
+        <div class="collapse <#= Code.raw(detailStyle) #>" id="tab_<#= detailTblVar #>"><!-- page* -->
+            <div class="card-body"><!-- .card-body -->
+    <# } else { #>
+        <div class="tab-pane <#= Code.raw(detailStyle) #>" id="tab_<#= detailTblVar #>"><!-- page* -->
+    <# } #>
+<# } #>
+<?php include_once "<#= detailGridPage #>" ?>
+<# if (showMultiPageForDetails) { #>
+    <# if (useAccordionForMultiPage) { #>
+            </div><!-- /.card-body -->
+        </div><!-- /page* -->
+    </div>
+    <# } else { #>
+        </div><!-- /page* -->
+    <# } #>
+<# } #>
+<?php } ?>
+<#
+            }
+        }
+    }
+
+    if (showMultiPageForDetails) {
+#>
+<# if (useAccordionForMultiPage) { #>
+</div><!-- /accordion -->
+<# } else { #>
+    </div><!-- /.tab-content -->
+</div><!-- /tabs -->
+<# } #>
+</div><!-- /detail-pages -->
+<?php } ?>
+<#
+    }
+#>

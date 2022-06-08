@@ -1,0 +1,8 @@
+<#
+    let checkToken = Code.Config.CheckToken,
+        token = Code.getName(Code.Page, Code.Token);
+#>
+<?php if (<#= checkToken #>) { ?>
+<input type="hidden" name="<?= $TokenNameKey ?>" value="<?= $TokenName ?>"><!-- CSRF token name -->
+<input type="hidden" name="<?= $TokenValueKey ?>" value="<?= $TokenValue ?>"><!-- CSRF token value -->
+<?php } ?>

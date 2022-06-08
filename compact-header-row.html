@@ -1,0 +1,52 @@
+	<!-- Table header -->
+    <tr class="ew-table-header">
+    <#
+        groupFields.forEach((grpFld, i) => {
+            FIELD = grpFld;
+            let fldName = grpFld.FldName, fldVar = grpFld.FldVar, fldParm = grpFld.FldParm, fldObj = Code.fldObj(),
+                classId = tblVar + "_" + fldParm,
+                visible = Code.getName(fldObj, Code.Field.Visible),
+                headerCellClass = Code.getName(fldObj, Code.Field.HeaderCellClass),
+                renderSort = Code.getName(pageObj, "renderSort(" + Code.getName(fldObj) + ")"),
+                scriptStart = "", scriptEnd = "";
+            if (UseCustomTemplate) {
+                let scriptId = CustomScriptId(tblVar + "_" + fldParm, "header");
+                scriptStart = `<template id="${scriptId}">`;
+                scriptEnd = "</template>";
+            }
+    #>
+<?php if (<#= visible #>) { ?>
+    <?php if ($<#= fldObj #>->ShowGroupHeaderAsRow) { ?>
+    <th data-name="<#= fldParm #>"><#= scriptStart #>&nbsp;<#= scriptEnd #></th>
+    <?php } else { ?>
+    <th data-name="<#= fldParm #>" class="<#= Code.write(headerCellClass) #>"<#= FieldHeaderAttributes(grpFld) #>><div class="<#= classId #>"><?= <#= renderSort #> ?></div></th>
+    <?php } ?>
+<?php } ?>
+    <#
+        });
+
+        for (let dtlFld of detailFields) {
+            FIELD = dtlFld;
+            let fldName = dtlFld.FldName,
+                fldObj = Code.fldObj(dtlFld),
+                fldParm = dtlFld.FldParm,
+                smryTypes = dtlFld.SummaryTypes,
+                caption = Code.getName(fldObj, Code.Field.Caption),
+                scriptStart = "", scriptEnd = "";
+            if (UseCustomTemplate) {
+                let scriptId = CustomScriptId(tblVar + "_" + fldParm, "header");
+                scriptStart = `<template id="${scriptId}">`;
+                scriptEnd = "</template>";
+            }
+            let visible = Code.getName(fldObj, Code.Field.Visible),
+                headerCellClass = Code.getName(fldObj, Code.Field.HeaderCellClass);
+            for (let smryType of smryTypes) {
+    #>
+<?php if (<#= visible #>) { ?>
+    <th data-name="<#= fldParm #>" class="<#= Code.write(headerCellClass) #>"<#= FieldHeaderAttributes(dtlFld) #>><#= scriptStart #><div class="ew-table-header-btn"><div class="ew-table-header-caption"><#= Code.raw(caption) #> (<?= $Language->phrase("Rpt<#= smryType #>") ?>)</div></div><#= scriptEnd #></th>
+<?php } ?>
+    <#
+            } // End for smryType
+        } // End for dtlFld
+    #>
+    </tr>

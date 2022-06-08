@@ -1,0 +1,272 @@
+<?xml version="1.0" standalone="yes"?>
+<phpmaker date="2022/06/07" version="17.0.15.9" desc="atoz template" author="Atoz Chevara">
+
+    <!-- Define output folders (NOTE: DO NOT include trailing delimiter) -->
+    <control id="_api" type="folder" ofolder="api" />
+    <control id="_models" type="folder" ofolder="models" />
+    <control id="_views" type="folder" ofolder="views" />
+    <control id="_controllers" type="folder" ofolder="controllers" />
+    <control id="_jquery" type="folder" ofolder="jquery" />
+    <control id="_css" type="folder" ofolder="css" />
+    <control id="_cssfonts" type="folder" ofolder="css/fonts" />
+    <control id="_js" type="folder" ofolder="js" />
+    <control id="_html" type="folder" ofolder="html" />
+    <control id="_images" type="folder" ofolder="images" />
+    <control id="_language" type="folder" ofolder="lang" />
+    <control id="_font" type="folder" ofolder="font" />
+    <control id="_locale" type="folder" ofolder="locale" />
+    <control id="_api" type="folder" ofolder="api" />
+    <control id="_src" type="folder" ofolder="src" />
+    <control id="_swagger" type="folder" ofolder="swagger" />
+
+    <!-- Copy composer.json -->
+    <control id="composer.json" type="simple" ifiles="composer.json" ofile="composer" oext="json" remark="composer.json" />
+
+    <!-- Generate all src files -->
+    <control id="src" type="simple" ifolder="src" ofolderid="_src" />
+
+    <!-- Copy Colorbox files -->
+    <control id="colorbox" type="copy" ofolder="colorbox" ifolder="colorbox" remark="Copy Colorbox files" />
+
+    <!-- Copy plugins -->
+    <control id="plugins" type="copy" ofolder="plugins" ifolder="plugins" remark="Copy plugins" />
+
+     <!-- Copy CSS font files -->
+    <control id="fonts" type="copy" ofolderid="_cssfonts" ifolder="fonts" remark="Copy font files" />
+
+    <!-- CSS (IMPORTANT NOTE: DO NOT CHANGE id) -->
+    <control id="_bootstrapcss" type="folder" ofolder="bootstrap4/css" />
+    <control id="_adminltecss" type="folder" ofolder="adminlte3/css" />
+    <control id="_swalcss" type="folder" ofolder="plugins/sweetalert2-theme-bootstrap-4" />
+    <control id="_adminltejs" type="folder" ofolder="adminlte3/js" />
+    <control id="bootstrap" type="copy" ofolder="bootstrap4" ifolder="bootstrap" remark="Copy Bootstrap files" />
+    <control id="adminlte" type="copy" ofolder="adminlte3" ifolder="adminlte" remark="Copy AdminLTE files" />
+    <control id="css" type="copy" ofolderid="_css" ifolder="css" />
+    <control id="@css" type="system" ofolderid="_css" ofile="{PROJ.ProjVar}" oext="css" remark="Create CSS file" />
+    <control id="@adminltecss" type="system" ofolderid="_adminltecss" ofile="adminlte" oext="css" remark="Create Bootstrap and AdminLTE CSS file" />
+
+    <!-- CSS for SweetAlert2 (NOTE: Must be after "plugins") -->
+    <control id="swalcss" type="copy" ofolderid="_swalcss" ifiles="bootstrap-4.scss" remark="Create SweetAlert2 CSS file" />
+
+    <!-- Swagger -->
+    <control id="swagger" type="copy" ofolderid="_swagger" ifolder="swagger" remark="Swagger UI" cond="PROJ.UseSwaggerUI" />
+    <control id="swaggerhtml" type="simple" ofolderid="_swagger" ofile="index" oext="html" ifiles="swagger.html" remark="For Swagger UI" cond="PROJ.UseSwaggerUI" />
+    <control id="swaggeryaml" type="simple" ofolderid="_views" ofile="swagger" oext="php" ifiles="swagger.php" remark="For Swagger UI" cond="PROJ.UseSwaggerUI" />
+
+    <!--
+        JavaScripts
+    -->
+    <!-- Copy javascript files -->
+    <control id="js" type="copy" ofolderid="_js" ifolder="js" />
+    <!-- Copy jquery files -->
+    <control id="jquery" type="copy" ofolder="jquery" ifolder="jquery" />
+    <!-- Copy moment files -->
+    <control id="moment" type="copy" ofolder="moment" ifolder="moment" />
+
+    <!-- Email template files -->
+    <control id="html" type="copy" ifolder="html" ofolderid="_html" remark="Copy text files" />
+    <!-- Register content -->
+    <control id="register_content_html" type="simple" ofolderid="_html" ifiles="register_content.html" cond="PROJ.SecRegisterPage &amp;&amp; (PROJ.SecType == 'Use Table' || PROJ.SecType == 'Both')" />
+
+    <!-- URL rewrite -->
+    <control id="htaccess" type="simple" ifiles=".htaccess" remark=".htaccess" />
+    <control id="webconfig" type="simple" ifiles="web.config" remark="web.config" />
+
+    <!-- API -->
+    <control id="apihtaccess" type="simple" ifiles=".htaccess" ofolderid="_api" remark=".htaccess (API)" />
+    <control id="apiwebconfig" type="simple" ifiles="web.config" ofolderid="_api" cond="PROJ.ApiCustomHeaders" remark="web.config (API)" />
+
+    <!-- Config -->
+    <control id="constants" type="simple" ofolderid="_src" ifiles="constants.php" />
+    <control id="config" type="simple" ofolderid="_src" ifiles="config.php" />
+    <control id="configdev" type="simple" ofolderid="_src" ofile="config.development" oext="php" ifiles="config-env.php" />
+    <control id="configprod" type="simple" ofolderid="_src" ofile="config.production" oext="php" ifiles="config-env.php" cond="PROJ.GenerateProduction" />
+
+    <!-- User Level settings -->
+    <control id="userlevelsettings" type="simple" ofolderid="_src" ifiles="userlevelsettings.php" />
+
+    <!-- layout (view) -->
+    <control id="layout" type="simple" ofolderid="_views" ifiles="layout.php" />
+
+    <!-- Menu file -->
+    <control id="menu" type="simple" ofolderid="_views" ofile="menu" oext="php" ifiles="menu.html" />
+
+    <!-- Common classes and functions -->
+    <control id="phpfn" type="simple" ofolderid="_src" ifiles="phpfn.php" />
+
+    <!-- User global code -->
+    <control id="userfn" type="simple" ofolderid="_src" ifiles="userfn.php" />
+
+    <!-- User JavaScript code -->
+    <control id="userglobaljs" type="simple" ofolderid="_js" ofile="userfn" oext="js" ifiles="global.js" />
+    <control id="usereventjs" type="simple" ofolderid="_js" ofile="userevent" oext="js" ifiles="event.js" />
+
+    <!-- Export email form -->
+    <control id="email" type="simple" ofolderid="_views" ofile="email" oext="php" ifiles="email.html" />
+
+    <!-- Error (view) -->
+    <control id="error" type="simple" ofolderid="_views" oext="php" ifiles="error.html" layout="true" remark="View" />
+
+    <!-- Error (model) -->
+    <control id="error" type="simple" ofolderid="_models" tagext="class" ifiles="error.php" remark="Class" />
+
+    <!-- Privacy (view) -->
+    <control id="privacy" type="simple" ofolderid="_views" oext="php" ifiles="privacy.html" layout="true" cond="PROJ.UseCookiePolicy" remark="View" />
+
+    <!-- Privacy (model) -->
+    <control id="privacy" type="simple" ofolderid="_models" tagext="class" ifiles="privacy.php" cond="PROJ.UseCookiePolicy" remark="Class" />
+
+    <!-- Cookie consent -->
+    <control id="cookieconsent" type="simple" ofolderid="_views" ofile="cookieconsent" oext="php" ifiles="cookieconsent.html" cond="PROJ.UseCookiePolicy" />
+
+    <!-- Personal data (view) -->
+    <control id="personal_data" type="simple" ofolderid="_views" oext="php" ifiles="personaldata.html" layout="true" cond="(PROJ.SecType == 'Use Table' || PROJ.SecType == 'Both') &amp;&amp; PROJ.UsePersonalData" remark="View" />
+
+    <!-- Personal data (model) -->
+    <control id="personal_data" type="simple" ofolderid="_models" tagext="class" ifiles="personaldata.php" cond="(PROJ.SecType == 'Use Table' || PROJ.SecType == 'Both') &amp;&amp; PROJ.UsePersonalData" remark="Class" />
+
+    <!-- Login (view) -->
+    <control id="login" type="simple" ofolderid="_views" oext="php" ifiles="login.html" layout="true" cond="PROJ.SecType == 'Hard Code' || PROJ.SecType == 'Use Table' || PROJ.SecType == 'Both'" remark="View" />
+
+    <!-- Login (model) -->
+    <control id="login" type="simple" ofolderid="_models" tagext="class" ifiles="login.php" cond="PROJ.SecType == 'Hard Code' || PROJ.SecType == 'Use Table' || PROJ.SecType == 'Both'" remark="Class" />
+
+    <!-- Reset password (view) -->
+    <control id="reset_password" type="simple" ofolderid="_views" oext="php" ifiles="resetpassword.html" layout="true" cond="PROJ.SecForgetPwdPage &amp;&amp; (PROJ.SecType == 'Use Table' || PROJ.SecType == 'Both')" remark="View" />
+
+    <!-- Forgot password (model) -->
+    <control id="reset_password" type="simple" ofolderid="_models" tagext="class" ifiles="resetpassword.php" cond="PROJ.SecForgetPwdPage &amp;&amp; (PROJ.SecType == 'Use Table' || PROJ.SecType == 'Both')" remark="Class" />
+
+    <!-- Change password (view) -->
+    <control id="change_password" type="simple" ofolderid="_views" oext="php" ifiles="changepassword.html" layout="true" cond="(PROJ.SecChangePwdPage || PROJ.MD5Password) &amp;&amp; (PROJ.SecType == 'Use Table' || PROJ.SecType == 'Both')" remark="View" />
+
+    <!-- Change password (model) -->
+    <control id="change_password" type="simple" ofolderid="_models" tagext="class" ifiles="changepassword.php" cond="(PROJ.SecChangePwdPage || PROJ.MD5Password) &amp;&amp; (PROJ.SecType == 'Use Table' || PROJ.SecType == 'Both')" remark="Class" />
+
+    <!-- Register (view) -->
+    <control id="register" type="simple" ofolderid="_views" oext="php" ifiles="register.html" layout="true" cond="PROJ.SecRegisterPage &amp;&amp; (PROJ.SecType == 'Use Table' || PROJ.SecType == 'Both')" remark="View" />
+
+    <!-- Register (model) -->
+    <control id="register" type="simple" ofolderid="_models" tagext="class" ifiles="register.php" cond="PROJ.SecRegisterPage &amp;&amp; (PROJ.SecType == 'Use Table' || PROJ.SecType == 'Both')" remark="Class" />
+
+    <!-- User privilege (view) -->
+    <control id="userpriv" type="simple" ofolderid="_views" oext="php" ifiles="userpriv.html" layout="true" cond="DB.UseDynamicUserLevel &amp;&amp; DB.UserLevelTbl != ''" remark="View" />
+
+    <!-- User privilege (model) -->
+    <control id="userpriv" type="simple" ofolderid="_models" tagext="class" ifiles="userpriv.php" cond="DB.UseDynamicUserLevel &amp;&amp; DB.UserLevelTbl != ''" remark="Class" />
+
+    <!-- Logout (model) -->
+    <control id="logout" type="simple" ofolderid="_models" tagext="class" ifiles="logout.php" remark="Class" cond="PROJ.SecType == 'Hard Code' || PROJ.SecType == 'Use Table' || PROJ.SecType == 'Both'" />
+
+    <!-- Index page -->
+    <control id="apiindex" type="simple" ofolderid="_api" ofile="index" oext="php" ifiles="index.php" remark="Index page (API)" />
+    <control id="index" type="simple" ofile="index" oext="php" ifiles="index.php" remark="Index page" />
+
+    <!-- Container definitions -->
+    <control id="definitions" type="simple" ofolderid="_src" ifiles="definitions.php" />
+
+    <!-- routes page -->
+    <control id="apiroutes" type="simple" ofolderid="_src" ofile="apiroutes" oext="php" ifiles="routes.php" remark="API Routes" />
+    <control id="routes" type="simple" ofolderid="_src" ifiles="routes.php" remark="Routes" />
+
+    <!-- controllers -->
+    <control id="controllerbase" type="simple" ofolderid="_controllers" ifiles="ControllerBase.php" />
+    <control id="controller" type="table" ofolderid="_controllers" ofile="Controller" oext="php" ifiles="controller.php" />
+    <control id="reportcontroller" type="report" ofolderid="_controllers" ofile="Controller" oext="php" ifiles="report-controller.php" cond="!TABLE.IsStatic" />
+    <control id="otherscontroller" type="simple" ofolderid="_controllers" ifiles="OthersController.php" />
+
+    <!-- API controller -->
+    <control id="apicontroller" type="simple" ofolderid="_controllers" ifiles="ApiController.php" />
+
+    <!--
+        Table specific files (one file per table)
+    -->
+
+    <!-- Table common information -->
+    <control id="info" type="table" ofolderid="_models" oext="php" ifiles="info.php" remark="Required by all table related pages" />
+
+    <!-- Table master (view) -->
+    <control id="master" type="table" ofolderid="_views" ofile="Master" oext="php" ifiles="master.html" cond="TABLE.TblIsMaster" remark="View" />
+
+    <!-- Table list (view) -->
+    <control id="list" type="table" ofolderid="_views" ofile="List" oext="php" ifiles="list.html" layout="true" remark="View" />
+
+    <!-- Table list (model) -->
+    <control id="list" type="table" ofolderid="_models" ofile="List" oext="php" tagext="class" ifiles="list.php" remark="Class" />
+
+    <!-- Detail grid (view) -->
+    <control id="grid" type="table" ofolderid="_views" ofile="Grid" oext="php" ifiles="list.html" cond="TABLE.TblIsDetail" remark="View" />
+
+    <!-- Detail grid (model) -->
+    <control id="grid" type="table" ofolderid="_models" ofile="Grid" oext="php" tagext="class" ifiles="list.php" cond="TABLE.TblIsDetail" remark="Class" />
+
+    <!-- Table add (view) -->
+    <control id="add" type="table" ofolderid="_views" ofile="Add" oext="php" ifiles="add.html" layout="true" cond="TABLE.TblAdd" remark="View" />
+
+    <!-- Table add (model) -->
+    <control id="add" type="table" ofolderid="_models" ofile="Add" oext="php" tagext="class" ifiles="add.php" cond="TABLE.TblAdd" remark="Class" />
+
+    <!-- Table add option (view) -->
+    <control id="addopt" type="table" ofolderid="_views" ofile="Addopt" oext="php" ifiles="addopt.html" cond="TABLE.TblAddOpt" remark="View" />
+
+    <!-- Table add option (model) -->
+    <control id="addopt" type="table" ofolderid="_models" ofile="Addopt" oext="php" tagext="class" ifiles="addopt.php" cond="TABLE.TblAddOpt" remark="Class" />
+
+    <!-- Table view (view) -->
+    <control id="view" type="table" ofolderid="_views" ofile="View" oext="php" ifiles="view.html" layout="true" cond="TABLE.TblView" remark="View" />
+
+    <!-- Table view (model) -->
+    <control id="view" type="table" ofolderid="_models" ofile="View" oext="php" tagext="class" ifiles="view.php" cond="TABLE.TblView" remark="Class" />
+
+    <!-- Table edit (view) -->
+    <control id="edit" type="table" ofolderid="_views" ofile="Edit" oext="php" ifiles="edit.html" layout="true" cond="TABLE.TblEdit" remark="View" />
+
+    <!-- Table edit (model) -->
+    <control id="edit" type="table" ofolderid="_models" ofile="Edit" oext="php" tagext="class" ifiles="edit.php" cond="TABLE.TblEdit" remark="Class" />
+
+    <!-- Table multi update (view) -->
+    <control id="update" type="table" ofolderid="_views" ofile="Update" oext="php" ifiles="update.html" layout="true" cond="TABLE.TblMultiUpdate" remark="View" />
+
+    <!-- Table update (model) -->
+    <control id="update" type="table" ofolderid="_models" ofile="Update" oext="php" tagext="class" ifiles="update.php" cond="TABLE.TblMultiUpdate" remark="Class" />
+
+    <!-- Table delete (view) -->
+    <control id="delete" type="table" ofolderid="_views" ofile="Delete" oext="php" ifiles="delete.html" layout="true" cond="TABLE.TblDelete" remark="View" />
+
+    <!-- Table delete (model) -->
+    <control id="delete" type="table" ofolderid="_models" ofile="Delete" oext="php" tagext="class" ifiles="delete.php" cond="TABLE.TblDelete" remark="Class" />
+
+    <!-- Table search (view) -->
+    <control id="search" type="table" ofolderid="_views" ofile="Search" oext="php" ifiles="search.html" layout="true" cond="TABLE.TblSearch" remark="View" />
+
+    <!-- Table search class -->
+    <control id="search" type="table" ofolderid="_models" ofile="Search" oext="php" tagext="class" ifiles="search.php" cond="TABLE.TblSearch" remark="Class" />
+
+    <!-- Info class for summary/crosstab report -->
+    <control id="reportinfo" type="report" ofolderid="_models" oext="php" ifiles="info.php" cond="TABLE.TblReportType == 'summary' || TABLE.TblReportType == 'crosstab'" remark="Required by all summary/crosstab reports" />
+
+    <!-- Summary report (view) -->
+    <control id="summary" type="report" ofolderid="_views" ofile="Summary" oext="php" ifiles="summary.html" layout="true" cond="TABLE.TblReportType == 'summary'" remark="View" />
+
+    <!-- Summary report (model) -->
+    <control id="summary" type="report" ofolderid="_models" ofile="Summary" oext="php" tagext="class" ifiles="summary.php" cond="TABLE.TblReportType == 'summary'" remark="Class" />
+
+    <!-- Crosstab report (view) -->
+    <control id="crosstab" type="report" ofolderid="_views" ofile="Crosstab" oext="php" ifiles="crosstab.html" layout="true" cond="TABLE.TblReportType == 'crosstab'" remark="View" />
+
+    <!-- Crosstab report (model) -->
+    <control id="crosstab" type="report" ofolderid="_models" ofile="Crosstab" oext="php" tagext="class" ifiles="crosstab.php" cond="TABLE.TblReportType == 'crosstab'" remark="Class" />
+
+    <!-- Dashboard report (view) -->
+    <control id="dashboard" type="report" ofolderid="_views" oext="php" ifiles="dashboard.html" layout="true" cond="TABLE.TblReportType == 'dashboard'" remark="View" />
+
+    <!-- Dashboard report (model) -->
+    <control id="dashboard" type="report" ofolderid="_models" oext="php" tagext="class" ifiles="dashboard.php" cond="TABLE.TblReportType == 'dashboard'" remark="Class" />
+
+    <!-- Custom file (view) -->
+    <control id="custom" type="report" ofolderid="_views" oext="php" ifiles="custom.html" cond="TABLE.TblReportType == 'custom'" remark="View" />
+
+    <!-- Custom file (model) -->
+    <control id="custom" type="report" ofolderid="_models" oext="php" tagext="class" ifiles="custom.php" cond="TABLE.TblReportType == 'custom' &amp;&amp; TABLE.IncludeFiles" remark="Class" />
+
+</phpmaker>

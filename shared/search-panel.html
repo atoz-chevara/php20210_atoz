@@ -1,0 +1,180 @@
+<#
+    // Search security check
+    let searchSecChkBegin = isSecurityEnabled ? `<?php if ($Security->canSearch()) { ?>` : "",
+        searchSecChkEnd = isSecurityEnabled ? `<?php } ?>` : "";
+#>
+<# if (["list", "summary", "crosstab"].includes(ctrlId) && (useBasicSearch || useExtendedBasicSearch)) { #>
+<#= searchSecChkBegin #>
+<?php if (!<#= isExport #> && !<#= currentAction #>) { ?>
+<form name="<#= formNameSearch #>" id="<#= formNameSearch #>" class="form-inline ew-form ew-ext-search-form" action="<#= Code.write(Code.CurrentPageUrl(false)) #>"<#= formNoValidate #>>
+<div id="<#= formNameSearch #>-search-panel" class="<#= Code.write(Code.getName(pageObj, Code.SearchPanelClass)) #>">
+<input type="hidden" name="cmd" value="search">
+<input type="hidden" name="t" value="<#= tblVar #>">
+    <div class="ew-extended-search">
+    <# if (useExtendedBasicSearch) { #>
+<?php
+// Render search row
+<#= rowType #> = ROWTYPE_SEARCH;
+$<#= pageObj #>->resetAttributes();
+$<#= pageObj #>->renderRow();
+?>
+    <#
+        let searchRowStyle = "", searchSpanEnd = "";
+        if (UseCustomTemplateSearch) {
+            searchSpanEnd = "</template>";
+            searchRowStyle = " d-none";
+        }
+
+        let initClass = (show) => show ? "" : " d-none"; // P16
+
+        for (let f of allFields) {
+            let yearSelectionField = ctrlId == "crosstab" && showYearSelection && f.FldParm == columnFieldParm;
+            if (!IsFieldExtendedSearch(f) && !yearSelectionField)
+                continue;
+            FIELD = f;
+            let fldVar = f.FldVar, fldParm = f.FldParm, fldObj = Code.fldObj(), fldName = f.FldName,
+                spanId = "el_" + tblVar + "_" + fldParm, spanId2 = "el2_" + tblVar + "_" + fldParm,
+                fldVar2 = "y_" + fldParm, fldHtmlTag = f.FldHtmlTag,
+                fldSrchOpr = f.FldSrchOpr, fldSrchOpr2 = f.FldSrchOpr2,
+                isBetween = fldSrchOpr == "BETWEEN",
+                isUserSelect = fldSrchOpr == "USER SELECT" && GetFieldType(f.FldType) != 4,
+                searchCaptionSpan = "", searchOperatorSpan = "", searchFieldSpan = "", searchConditionSpan = "",
+                searchOperator2Span = "", searchField2Span = "";
+            let showSearchOperator = true;
+            if (["summary", "crosstab"].includes(ctrlId) && (!IsTextFilter(f) && !isBetween || yearSelectionField)) { // Handle non-text filter for reports
+                fldSrchOpr = ""; // Clear search operator
+                fldSrchOpr2 = ""; // No second operator
+                isUserSelect = false; // No user select
+                showSearchOperator = IsBooleanCheckboxFilter(TABLE, f) && fldSrchOpr == "USER SELECT";
+            }
+            if (UseCustomTemplateSearch) {
+                let templateId = tblVar + "_" + fldParm,
+                    searchCaptionId = CustomScriptId(templateId, "searchcaption"),
+                    searchOperatorId = CustomScriptId(templateId, "operator"),
+                    searchFieldId = CustomScriptId(templateId, "value"),
+                    searchConditionId = CustomScriptId(templateId, "condition"),
+                    searchOperator2Id = CustomScriptId(templateId, "operator2"),
+                    searchField2Id = CustomScriptId(templateId, "value2");
+                searchCaptionSpan = `<template id="${searchCaptionId}">`;
+                searchOperatorSpan = `<template id="${searchOperatorId}">`;
+                searchFieldSpan = `<template id="${searchFieldId}">`;
+                searchConditionSpan = `<template id="${searchConditionId}">`;
+                searchOperator2Span = `<template id="${searchOperator2Id}">`;
+                searchField2Span = `<template id="${searchField2Id}">`;
+            }
+            let forLabel = (UseForLabel(f) || f.FldHtmlTag == "NO") ? ` for="${fldVar}"` : "",
+                visible = Code.getName(fldObj, Code.Field.Visible);
+    #>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+    <?php
+        $<#= pageObj #>->SearchColumnCount++;
+        if (($<#= pageObj #>->SearchColumnCount - 1) % $<#= pageObj #>->SearchFieldsPerRow == 0) {
+            $<#= pageObj #>->SearchRowCount++;
+    ?>
+<div id="xsr_<?= $<#= pageObj #>->SearchRowCount ?>" class="ew-row d-sm-flex<#= searchRowStyle #>">
+    <?php
+        }
+     ?>
+    <div id="xsc_<#= fldParm #>" class="ew-cell form-group">
+    <#
+        if (yearSelectionField) {
+            let distinctValues = Code.getName(pageObj, columnDateFieldParm, Code.Field.DistinctValues),
+                currentValue = Code.getName(pageObj, columnDateFieldParm, Code.Field.CurrentValue);
+    #>
+    <#= searchCaptionSpan #><label for="<#= columnDateFieldName #>" class="ew-search-caption ew-label"><?= $Language->phrase("Year") ?></label><#= searchSpanEnd #>
+    <#= searchFieldSpan #><span class="ew-search-field">
+    <select id="<#= columnDateFieldName #>" class="form-control" name="<#= columnDateFieldName #>">
+<?php
+// Set up array
+if (is_array(<#= distinctValues #>)) {
+    $yearCount = count(<#= distinctValues #>);
+    for ($yearIndex = 0; $yearIndex < $yearCount; $yearIndex++) {
+        $yearValue = <#= distinctValues #>[$yearIndex];
+        $yearSelected = (strval($yearValue) == strval(<#= currentValue #>)) ? " selected" : "";
+?>
+    <option value="<?= $yearValue ?>"<?= $yearSelected ?>><?= $yearValue ?></option>
+<?php
+    }
+}
+?>
+    </select>
+    </span><#= searchSpanEnd #>
+    <#
+        } else {
+    #>
+        <#= searchCaptionSpan #><label<#= forLabel #> class="ew-search-caption ew-label"><#= FieldSearchCaption() #></label><#= searchSpanEnd #>
+    <# if (showSearchOperator) { #>
+        <#= searchOperatorSpan #><span class="ew-search-operator"><#= FieldOperator() #></span><#= searchSpanEnd #>
+    <# } #>
+        <#= searchFieldSpan #><span id="<#= spanId #>" class="ew-search-field"><#= FieldSearch() #></span><#= searchSpanEnd #><#= JavaScriptString #>
+        <#= searchConditionSpan #>
+            <# if (fldSrchOpr2) { #>
+        <span class="ew-search-cond<#= initClass(!isBetween) #>"><#= FieldSearchCondition() #></span>
+            <# } #>
+            <# if (isBetween || isUserSelect) { #>
+        <span class="ew-search-and<#= initClass(isBetween) #>"><label><#= Code.raw(Code.languagePhrase("AND")) #></label></span>
+            <# } #>
+        <#= searchSpanEnd #>
+            <# if (fldSrchOpr2) { #>
+        <#= searchOperator2Span #><span class="ew-search-operator2<#= initClass(!isBetween) #>"><#= FieldOperator2() #></span><#= searchSpanEnd #>
+            <# } #>
+            <# if (fldSrchOpr2 || isBetween || isUserSelect) { #>
+        <#= searchField2Span #><span id="<#= spanId2 #>" class="ew-search-field2<#= initClass(isBetween || fldSrchOpr2) #>"><#= FieldSearch2() #></span><#= searchSpanEnd #><#= JavaScriptString #>
+            <# } #>
+    <#
+        }
+    #>
+    </div>
+    <?php if ($<#= pageObj #>->SearchColumnCount % $<#= pageObj #>->SearchFieldsPerRow == 0) { ?>
+</div>
+    <?php } ?>
+<?php } ?>
+    <# } // AllField #>
+    <?php if ($<#= pageObj #>->SearchColumnCount % $<#= pageObj #>->SearchFieldsPerRow > 0) { ?>
+</div>
+    <?php } ?>
+    <# } // useExtendedBasicSearch #>
+
+<# if (UseCustomTemplateSearch) { #>
+<#= GetCustomTemplateSearch() #>
+<# } #>
+
+<div id="xsr_<?= $<#= pageObj #>->SearchRowCount + 1 ?>" class="ew-row d-sm-flex">
+    <# if (!useBasicSearch && useExtendedBasicSearch) { #>
+    <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit"><#= Code.raw(Code.languagePhrase("SearchBtn")) #></button>
+    <# } #>
+    <# if (useBasicSearch) { #>
+<#
+    let placeHolder = UsePlaceHolder == "Caption" ? ` placeholder="${Code.write(Code.htmlEncode(Code.languagePhrase("Search")))}"` : "",
+        basicSearchKeyword = Code.getName(pageObj, Code.BasicSearch.Keyword),
+        basicSearchType = Code.getName(pageObj, Code.BasicSearch.Type),
+        basicSearchTypeNameShort = Code.getName(pageObj, Code.BasicSearch.TypeNameShort);
+#>
+    <div class="ew-quick-search input-group">
+        <input type="text" name="<#= Code.write(Code.Config.TableBasicSearch) #>" id="<#= Code.write(Code.Config.TableBasicSearch) #>" class="form-control" value="<#= Code.write(Code.htmlEncode(basicSearchKeyword)) #>"<#= placeHolder #>>
+        <input type="hidden" name="<#= Code.write(Code.Config.TableBasicSearchType) #>" id="<#= Code.write(Code.Config.TableBasicSearchType) #>" value="<#= Code.write(Code.htmlEncode(basicSearchType)) #>">
+        <div class="input-group-append">
+            <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit"><#= Code.raw(Code.languagePhrase("SearchBtn")) #></button>
+            <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false"><span id="searchtype"><#= Code.raw(basicSearchTypeNameShort) #></span></button>
+            <div class="dropdown-menu dropdown-menu-right">
+                <a class="dropdown-item<?php if (<#= basicSearchType #> == "") { ?> active<?php } ?>" href="#" onclick="return ew.setSearchType(this);"><#= Code.raw(Code.languagePhrase("QuickSearchAuto")) #></a>
+                <a class="dropdown-item<?php if (<#= basicSearchType #> == "=") { ?> active<?php } ?>" href="#" onclick="return ew.setSearchType(this, '=');"><#= Code.raw(Code.languagePhrase("QuickSearchExact")) #></a>
+                <a class="dropdown-item<?php if (<#= basicSearchType #> == "AND") { ?> active<?php } ?>" href="#" onclick="return ew.setSearchType(this, 'AND');"><#= Code.raw(Code.languagePhrase("QuickSearchAll")) #></a>
+                <a class="dropdown-item<?php if (<#= basicSearchType #> == "OR") { ?> active<?php } ?>" href="#" onclick="return ew.setSearchType(this, 'OR');"><#= Code.raw(Code.languagePhrase("QuickSearchAny")) #></a>
+            </div>
+        </div>
+    </div>
+    <# } #>
+</div>
+    </div><!-- /.ew-extended-search -->
+
+</div><!-- /.ew-search-panel -->
+</form>
+
+<# if (UseCustomTemplateSearch) { #>
+<#= RenderCustomTemplateSearch() #>
+<# } #>
+
+<?php } ?>
+<#= searchSecChkEnd #>
+<# } #>

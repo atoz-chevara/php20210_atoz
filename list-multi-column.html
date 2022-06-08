@@ -1,0 +1,115 @@
+<div class="ew-multi-column-grid">
+
+<## Upper panel #>
+<# if (topPageLink) { #>
+<#= include('shared/list-upper-panel.html') #>
+<# } #>
+
+<## Form head #>
+<#= include('shared/list-form-head.html') #>
+
+<#
+    let multiColumnClass = Code.getName(pageObj, Code.MultiColumnClass);
+#>
+
+<div class="row ew-multi-column-row">
+
+<# if (ctrlId != "grid") { #>
+    <# if (inlineAdd || inlineCopy) { #>
+<?php if (<#= totalRecs #> > 0 || <#= isAdd #> || <#= isCopy #> || <#= isGridEdit #>) { ?>
+    <# } else { #>
+<?php if (<#= totalRecs #> > 0 || <#= isGridEdit #>) { ?>
+    <# } #>
+<# } #>
+
+<# if (ctrlId == "list" && (inlineAdd || inlineCopy)) { #>
+<## Inline add #>
+<# GenerateTemplateLine = false; #>
+<#= include('shared/list-inline-add.html') #>
+<# } #>
+
+<## Load records script start #>
+<#= include('shared/list-load-records-script-start.php') #>
+
+<div class="<#= Code.write(multiColumnClass) #>" <#= Code.raw(rowAttributes) #>>
+    <div class="card ew-card">
+    <div class="card-body">
+    <?php if (<#= rowType #> == ROWTYPE_VIEW) { // View record ?>
+    <table class="<#= tableClasses #> ew-view-table">
+    <?php } ?>
+<#
+    let rowcnt = 0;
+    for (let f of currentFields) {
+        FIELD = f;
+        rowcnt += 1;
+        let fldName = f.FldName, fldParm = f.FldParm, fldObj = Code.fldObj(),
+            classId = tblVar + "_" + fldParm,
+            visible = Code.getName(fldObj, Code.Field.Visible),
+            cellAttributes = Code.getName(fldObj, Code.Field.CellAttributes),
+            renderSort = Code.getName(pageObj, "renderSort(" + Code.getName(fldObj) + ")");
+#>
+    <?php if (<#= visible #>) { // <#= fldName #> ?>
+        <?php if (<#= rowType #> == ROWTYPE_VIEW) { // View record ?>
+        <tr>
+            <td class="ew-table-header <#= Code.write(pageTableLeftColumnClass) #>"><span class="<#= classId #>"<#= FieldHeaderAttributes(f) #>><?= <#= renderSort #> ?></span></td>
+            <td <#= Code.raw(cellAttributes) #>><#= FieldList() #></td>
+        </tr>
+        <?php } else { // Add/edit record ?>
+        <div class="form-group row <#= classId #>">
+            <label class="<#= Code.write(pageLeftColumnClass) #>"><#= FieldCaption() #></label>
+            <div class="<#= Code.write(pageRightColumnClass) #>"><div <#= Code.raw(cellAttributes) #>><#= FieldList() #></div></div>
+        </div>
+        <?php } ?>
+    <?php } ?>
+<#
+    } // Field
+#>
+    <?php if (<#= rowType #> == ROWTYPE_VIEW) { // View record ?>
+    </table>
+    <?php } ?>
+    </div><!-- /.card-body -->
+
+<?php if (!<#= isExport #>) { ?>
+    <div class="card-footer">
+        <div class="ew-multi-column-list-option">
+<?php
+// Render list options (body, bottom)
+<# if (UseCustomTemplate) { #>
+$<#= pageObj #>->ListOptions->render("body", "bottom", <#= rowCnt #>, "<#= customListOptionsBody #>", $<#= pageObj #>->TableVar, "<#= templateClass #>");
+<# } else { #>
+$<#= pageObj #>->ListOptions->render("body", "bottom", <#= rowCnt #>);
+<# } #>
+?>
+        </div><!-- /.ew-multi-column-list-option -->
+        <div class="clearfix"></div>
+    </div><!-- /.card-footer -->
+<?php } ?>
+
+    </div><!-- /.card -->
+</div><!-- /.col-* -->
+
+<## Load records script end #>
+<#= include('shared/list-load-records-script-end.php') #>
+
+<# if (ctrlId != "grid") { #>
+<?php } ?>
+<# } #>
+
+</div><!-- /.ew-multi-column-row -->
+
+<# if (UseCustomTemplate) { #>
+<#= GetCustomTemplate() #>
+<# } #>
+
+<## Form end #>
+<#= include('shared/list-form-foot.html') #>
+
+<## Close recordset #>
+<#= include('shared/list-close-recordset-script.php') #>
+
+<## Lower panel #>
+<# if (bottomPageLink || !topPageLink) { #>
+<#= include('shared/list-lower-panel.html') #>
+<# } #>
+
+</div><!-- /.ew-multi-column-grid -->

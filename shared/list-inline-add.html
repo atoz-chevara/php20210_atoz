@@ -1,0 +1,148 @@
+<#
+    let pageMultiColumnClass = Code.getName(pageObj, Code.MultiColumnClass),
+        bundleIds = [formName, "load"];
+
+    if (UseCustomTemplate)
+        bundleIds.push("customtemplate");
+#>
+<?php
+
+<# if (GenerateTemplateLine) { #>
+
+    <# if (ctrlId == "grid") { #>
+    if (<#= currentMode #> == "add" || <#= currentMode #> == "copy" || <#= currentMode #> == "edit") {
+    <# } else { #>
+    if (<#= isGridAdd #> || <#= isGridEdit #>) {
+    <# } #>
+
+        <#= rowIndex #> = '$rowindex$';
+        $<#= pageObj #>->loadRowValues();
+
+        // Set row properties
+        $<#= pageObj #>->resetAttributes();
+        $<#= pageObj #>->RowAttrs->merge(["data-rowindex" => <#= rowIndex #>, "id" => "r0_<#= tblVar #>", "data-rowtype" => ROWTYPE_ADD]);
+        $<#= pageObj #>->RowAttrs->appendClass("ew-template");
+
+<# } else { #>
+
+    if (<#= isAdd #> || <#= isCopy #>) {
+
+        <#= rowIndex #> = 0;
+        <#= keyCount #> = <#= rowIndex #>;
+
+    <# if (inlineCopy) { #>
+        if (<#= isCopy #> && !$<#= pageObj #>->loadRow())
+            <#= currentAction #> = "add";
+    <# } #>
+
+        if (<#= isAdd #>)
+            $<#= pageObj #>->loadRowValues();
+
+        if ($<#= pageObj #>->EventCancelled) // Insert failed
+            $<#= pageObj #>->restoreFormValues(); // Restore form values
+
+        // Set row properties
+        $<#= pageObj #>->resetAttributes();
+        $<#= pageObj #>->RowAttrs->merge(["data-rowindex" => 0, "id" => "r0_<#= tblVar #>", "data-rowtype" => ROWTYPE_ADD]);
+
+<# } #>
+
+        <#= rowType #> = ROWTYPE_ADD;
+
+        // Render row
+        $<#= pageObj #>->renderRow();
+
+        // Render list options
+        $<#= pageObj #>->renderListOptions();
+        $<#= pageObj #>->StartRowCount = 0;
+?>
+<# let rowidx = GenerateTemplateLine ? rowIndex : rowCnt; #>
+
+<# if (recPerRow < 1) { // Normal layout #>
+
+    <tr <#= Code.raw(rowAttributes) #>>
+
+<?php
+// Render list options (body, left)
+<# if (UseCustomTemplate) { #>
+$<#= pageObj #>->ListOptions->render("body", "left", <#= rowidx #>, "<#= customListOptionsBody #>", $<#= pageObj #>->TableVar, "<#= templateClass #>");
+<# } else { #>
+$<#= pageObj #>->ListOptions->render("body", "left", <#= rowidx #>);
+<# } #>
+?>
+
+    <#
+    for (let f of currentFields) {
+        FIELD = f;
+        let fldName = f.FldName, fldParm = f.FldParm, fldObj = Code.fldObj(),
+            visible = Code.getName(fldObj, Code.Field.Visible);
+        let ctl = FieldAdd();
+    #>
+    <?php if (<#= visible #>) { // <#= fldName #> ?>
+        <td data-name="<#= fldParm #>"><#= ctl #></td>
+    <?php } ?>
+    <#
+    } // Field
+    #>
+
+<?php
+// Render list options (body, right)
+<# if (UseCustomTemplate) { #>
+$<#= pageObj #>->ListOptions->render("body", "right", <#= rowidx #>, "<#= customListOptionsBody #>", $<#= pageObj #>->TableVar, "<#= templateClass #>");
+<# } else { #>
+$<#= pageObj #>->ListOptions->render("body", "right", <#= rowidx #>);
+<# } #>
+?>
+
+<script>
+loadjs.ready(<#= JSON.stringify(bundleIds) #>, function() {
+    <#= formName #>.updateLists(<#= Code.write(rowIndex) #>);
+});
+</script>
+
+    </tr>
+
+<# } else { // Multi-Column #>
+
+<div class="<#= Code.write(pageMultiColumnClass) #>" <#= Code.raw(rowAttributes) #>>
+    <#
+    for (let f of currentFields) {
+        FIELD = f;
+        let fldName = f.FldName, fldParm = f.FldParm, fldObj = Code.fldObj(),
+            visible = Code.getName(fldObj, Code.Field.Visible),
+            cellAttributes = Code.getName(fldObj, Code.Field.CellAttributes),
+            ctl = FieldAdd(),
+            classId = tblVar + "_" + fldParm;
+    #>
+    <?php if (<#= visible #>) { // <#= fldName #> ?>
+        <div class="form-group row <#= classId #>">
+            <label class="<#= Code.write(pageLeftColumnClass) #>"><#= FieldCaption() #></label>
+            <div class="<#= Code.write(pageRightColumnClass) #>"><div <#= Code.raw(cellAttributes) #>><#= ctl #></div></div>
+        </div>
+    <?php } ?>
+    <#
+    } // Field
+    #>
+<div class="ew-multi-column-list-option">
+<?php
+// Render list options (body, bottom)
+<# if (UseCustomTemplate) { #>
+$<#= pageObj #>->ListOptions->render("body", "bottom", <#= rowidx #>, "<#= customListOptionsBody #>", $<#= pageObj #>->TableVar, "<#= templateClass #>");
+<# } else { #>
+$<#= pageObj #>->ListOptions->render("body", "bottom", <#= rowidx #>);
+<# } #>
+?>
+</div>
+<div class="clearfix"></div>
+</div>
+
+<script>
+loadjs.ready(<#= JSON.stringify(bundleIds) #>, "load"], function() {
+    <#= formName #>.updateLists(<#= Code.write(rowIndex) #>);
+});
+</script>
+
+<# } #>
+<?php
+    }
+?>

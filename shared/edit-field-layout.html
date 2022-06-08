@@ -1,0 +1,35 @@
+<#
+    if (IsEmpty(FIELD.FldAutoUpdateValue) && !IsHiddenField(TABLE, FIELD, ctrlId)) { // Skip if auto-update or hidden
+        let fldParm = FIELD.FldParm, fldVar = FIELD.FldVar, fldObj = Code.fldObj(), fldName = FIELD.FldName,
+            headerSpanId = "elh_" + tblVar + "_" + fldParm,
+            forLabel = "";
+        if (UseForLabel(FIELD))
+            forLabel = ` for="${fldVar}"`;
+
+        let visible = Code.getName(fldObj, Code.Field.Visible),
+            cellAttributes = Code.getName(fldObj, Code.Field.CellAttributes);
+#>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (<#= isMobileOrModal #>) { ?>
+<# } #>
+
+    <div id="r_<#= fldParm #>" class="form-group row">
+        <label id="<#= headerSpanId #>"<#= forLabel #> class="<#= Code.write(pageLeftColumnClass) #>"><#= FieldCaption() #></label>
+        <div class="<#= Code.write(pageRightColumnClass) #>"><div <#= Code.raw(cellAttributes) #>><#= FieldEdit() #></div></div>
+    </div>
+
+<# if (useTabularFormForDesktop) { #>
+<?php } else { ?>
+    <tr id="r_<#= fldParm #>">
+        <td class="<#= Code.write(pageTableLeftColumnClass) #>"><span id="<#= headerSpanId #>"><#= FieldCaption() #></span></td>
+        <td <#= Code.raw(cellAttributes) #>><#= FieldEdit() #></td>
+    </tr>
+<?php } ?>
+<# } #>
+
+<?php } ?>
+<#
+    }
+#>

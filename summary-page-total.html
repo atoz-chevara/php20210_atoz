@@ -1,0 +1,121 @@
+<#
+    // Hide page total if grand total = page total
+    let checkPageTotalStart = "",
+        checkPageTotalEnd = "";
+    if (TABLE.TblRptShowGrandTotal && !UseCustomTemplate) {
+        checkPageTotalStart = Code.if(`(${stopGrp} - ${startGrp} + 1) != ${totalGrps}`);
+        checkPageTotalEnd = Code.end;
+    }
+#>
+<#= checkPageTotalStart #>
+
+<?php
+    $<#= pageObj #>->resetAttributes();
+    $<#= pageObj #>->RowType = ROWTYPE_TOTAL;
+    $<#= pageObj #>->RowTotalType = ROWTOTAL_PAGE;
+    $<#= pageObj #>->RowTotalSubType = ROWTOTAL_FOOTER;
+    $<#= pageObj #>->RowAttrs["class"] = "ew-rpt-page-summary";
+    $<#= pageObj #>->renderRow();
+?>
+
+    <# if (groupFields.length > 0) { #>
+<?php if ($<#= firstGroupFldObj #>->ShowCompactSummaryFooter) { ?>
+    <# } else { #>
+<?php if ($<#= pageObj #>->ShowCompactSummaryFooter) { ?>
+    <# } #>
+
+    <tr<?= $<#= pageObj #>->rowAttributes(); ?>><td colspan="<?= ($<#= pageObj #>->GroupColumnCount + $<#= pageObj #>->DetailColumnCount) ?>"><#= Code.raw(Code.languagePhrase("RptPageSummary")) #> <span class="ew-summary-count">(<span class="ew-aggregate-caption"><?= $Language->phrase("RptCnt") ?></span><?= $Language->phrase("AggregateEqual") ?><span class="ew-aggregate-value"><?= FormatNumber($<#= pageObj #>->PageTotalCount, 0); ?></span>)</span></td></tr>
+
+<# if (hasSummaryFields) { #>
+
+    <tr<?= $<#= pageObj #>->rowAttributes(); ?>>
+<?php if ($<#= pageObj #>->GroupColumnCount > 0) { ?>
+        <td colspan="<?= $<#= pageObj #>->GroupColumnCount ?>" class="ew-rpt-grp-aggregate">&nbsp;</td>
+<?php } ?>
+<#
+    detailFields.forEach((dtlFld, i) => {
+        let fldName = dtlFld.FldName,
+            fldParm = dtlFld.FldParm,
+            fldObj = Code.fldObj(dtlFld),
+            summaryName = "";
+        // Get summary name
+        FIELD = dtlFld;
+        for (let summaryType of summaryTypes) {
+            if (SameText(summaryType, "Sum") && dtlFld.FldRptAggSum ||
+                SameText(summaryType, "Avg") && dtlFld.FldRptAggAvg ||
+                SameText(summaryType, "Min") && dtlFld.FldRptAggMin ||
+                SameText(summaryType, "Max") && dtlFld.FldRptAggMax ||
+                SameText(summaryType, "Cnt") && dtlFld.FldRptAggCnt) {
+                if (summaryName != "")
+                    summaryName += "<br>";
+                summaryName += `<span class="ew-aggregate-caption"><?= $Language->phrase("Rpt${summaryType}") ?></span><?= $Language->phrase("AggregateEqual") ?><span class="ew-aggregate-value">`;
+                summaryName += FieldSummaryView({ smry: "page", id: summaryType, lvl: 0 }).replace(/[\r\n]/g, "");
+                summaryName += "</span>";
+            }
+        } // End for summaryType
+#>
+<?php if ($<#= fldObj #>->Visible) { ?>
+        <td data-field="<#= fldParm #>"<?= $<#= fldObj #>->cellAttributes() ?>><#= summaryName #></td>
+<?php } ?>
+<#
+    }); // End for dtlFld
+#>
+    </tr>
+
+<# } #>
+
+<?php } else { ?>
+
+    <tr<?= $<#= pageObj #>->rowAttributes(); ?>><td colspan="<?= ($<#= pageObj #>->GroupColumnCount + $<#= pageObj #>->DetailColumnCount) ?>"><#= Code.raw(Code.languagePhrase("RptPageSummary")) #> <span class="ew-summary-count">(<?= FormatNumber($<#= pageObj #>->PageTotalCount, 0); ?><#= Code.raw(Code.languagePhrase("RptDtlRec")) #>)</span></td></tr>
+
+<#
+    for (let summaryType of summaryTypes) {
+#>
+    <tr<?= $<#= pageObj #>->rowAttributes(); ?>>
+    <#
+        if (groupFields.length > 0) {
+    #>
+<?php if ($<#= pageObj #>->GroupColumnCount > 0) { ?>
+        <td colspan="<?= $<#= pageObj #>->GroupColumnCount ?>" class="ew-rpt-grp-aggregate"><?= $Language->phrase("Rpt<#= summaryType #>") ?></td>
+<?php } ?>
+    <#
+        }
+    #>
+    <#
+        for (let dtlFld of detailFields) {
+            let fldName = dtlFld.FldName,
+                fldParm = dtlFld.FldParm,
+                fldObj = Code.fldObj(dtlFld);
+            FIELD = dtlFld;
+    #>
+<?php if ($<#= fldObj #>->Visible) { ?>
+    <#
+            if (SameText(summaryType, "Sum") && dtlFld.FldRptAggSum ||
+                SameText(summaryType, "Avg") && dtlFld.FldRptAggAvg ||
+                SameText(summaryType, "Min") && dtlFld.FldRptAggMin ||
+                SameText(summaryType, "Max") && dtlFld.FldRptAggMax ||
+                SameText(summaryType, "Cnt") && dtlFld.FldRptAggCnt) {
+                let smryCaption = groupFields.length == 0 ? `<?= $Language->phrase("Rpt${summaryType}") ?>` : "";
+                if (!IsEmpty(smryCaption))
+                    smryCaption = `<span class="ew-aggregate">${smryCaption}</span><?= $Language->phrase("AggregateColon") ?>`;
+    #>
+        <td data-field="<#= fldParm #>"<?= $<#= fldObj #>->cellAttributes() ?>><#= smryCaption #><#= FieldSummaryView({ smry: "page", id: summaryType, lvl: 0 }) #></td>
+    <#
+            } else {
+    #>
+        <td data-field="<#= fldParm #>"<?= $<#= fldObj #>->cellAttributes() ?>>&nbsp;</td>
+    <#
+            }
+    #>
+<?php } ?>
+    <#
+        } // End for dtlFld
+    #>
+    </tr>
+<#
+    } // End for summaryType
+#>
+
+<?php } ?>
+
+<#= checkPageTotalEnd #>

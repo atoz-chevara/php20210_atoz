@@ -1,0 +1,108 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+
+<## Namespace #>
+<#= include('shared/namespace.php') #>
+
+<## Page load #>
+<#= include('shared/page-load.php') #>
+
+<## Show message #>
+<#= include('shared/show-message.html') #>
+
+<#
+    let formName = "fdeleteuser",
+        failureMessage = Code.getName(pageObj, Code.FailureMessage),
+        downloadLink = Code.concat(Code.CurrentPageUrl(false), '"?cmd=download"'), // PHP
+        deleteLink = Code.concat(Code.CurrentPageUrl(false), '"?cmd=delete"'); // PHP
+
+    let password = Code.raw(Code.getName(pageObj, "Password", "FieldVar")),
+        passwordAtt = Code.getName(pageObj, "Password", "editAttributes()"),
+        passwordMsg = Code.getName(pageObj, "Password", Code.Field.ErrorMessage);
+#>
+
+<?php if (SameText(Get("cmd"), "Delete")) { ?>
+    <script>
+        var <#= formName #>;
+        loadjs.ready("head", function() {
+            var $ = jQuery;
+            <#= formName #> = new ew.Form("<#= formName #>");
+
+            // Add field
+            <#= formName #>.addFields([
+                ["password", ew.Validators.required(ew.language.phrase("Password"))]
+            ]);
+
+            // Set invalid fields
+            $(function() {
+                <#= formName #>.setInvalid();
+            });
+
+            // Extend page with Validate function
+            <#= formName #>.validate = function() {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                return true;
+            }
+
+            // Use JavaScript validation
+            <#= formName #>.validateRequired = <#= Code.write(Code.jsonEncode(Code.Config.ClientValidate)) #>;
+
+            loadjs.done("<#= formName #>");
+        });
+    </script>
+
+    <div class="alert alert-danger d-inline-block">
+        <i class="icon fas fa-ban"></i><#= Code.raw(Code.languagePhrase("PersonalDataWarning")) #>
+    </div>
+    <?php if (!EmptyString(<#= failureMessage #>)) { ?>
+    <div class="text-danger">
+        <ul>
+            <li><#= Code.raw(failureMessage) #></li>
+        </ul>
+    </div>
+    <?php } ?>
+    <div>
+        <form name="<#= formName #>" id="<#= formName #>" method="post" class="form-group"<#= formNoValidate #>>
+
+<## Token tag #>
+<#= include('shared/token-tag.html') #>
+
+            <div class="text-danger"></div>
+            <div class="form-group">
+                <label id="label" class="control-label ew-label"><#= Code.raw(Code.languagePhrase("Password")) #></label>
+                <div class="input-group">
+                    <input type="password" name="<#= password #>" id="<#= password #>" autocomplete="current-password" placeholder="<#= Code.write(Code.htmlEncode(Code.languagePhrase("Password"))) #>"<#= Code.raw(passwordAtt) #>>
+                    <div class="input-group-append"><#= TogglePasswordButton(true) #></div>
+                    <#= FieldEditErrorMessage({ msg: passwordMsg }) #>
+                </div>
+            </div>
+            <button class="btn btn-primary" type="submit"><#= Code.raw(Code.languagePhrase("CloseAccountBtn")) #></button>
+        </form>
+    </div>
+
+<?php } else { ?>
+
+    <div class="row">
+        <div class="col">
+            <p><#= Code.raw(Code.languagePhrase("PersonalDataContent")) #></p>
+            <div class="alert alert-danger d-inline-block">
+                <i class="icon fas fa-ban"></i><#= Code.raw(Code.languagePhrase("PersonalDataWarning")) #>
+            </div>
+            <p>
+                <a id="download" href="<#= Code.writePath(downloadLink) #>" class="btn btn-default"><#= Code.raw(Code.languagePhrase("DownloadBtn")) #></a>
+                <a id="delete" href="<#= Code.writePath(deleteLink) #>" class="btn btn-default"><#= Code.raw(Code.languagePhrase("DeleteBtn")) #></a>
+            </p>
+        </div>
+    </div>
+
+<?php } ?>
+<?php $<#= pageObj #>->clearFailureMessage(); ?>
+
+<## Page unload #>
+<#= include('shared/page-unload.php') #>

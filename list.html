@@ -1,0 +1,84 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+
+<## Common table config #>
+<#= include('shared/config-table.php') #>
+
+<## Page load #>
+<#= include('shared/page-load.php') #>
+
+<#= exportStart #>
+<## Local JavaScript #>
+<#= include('shared/local.js') #>
+
+<# if (ctrlId == "list") { #>
+<## Client JavaScript #>
+<#= include('shared/client.js') #>
+<# } #>
+<#= exportEnd #>
+
+<## Toolbar #>
+<#= include('./list-toolbar.html') #>
+
+<## Master record #>
+<#= include('./list-master.html') #>
+
+<## Render other options #>
+<?php
+$<#= pageObj #>->renderOtherOptions();
+?>
+
+<# if (ctrlId == "list") { #>
+
+<## Search panel #>
+<#= include('shared/search-panel.html') #>
+
+<## Page header #>
+<#= include('shared/page-header.html') #>
+
+<## Show message #>
+<#= include('shared/show-message.html') #>
+
+<# } #>
+
+<## Main table #>
+
+<?php if (<#= totalRecs #> > 0 || <#= currentAction #>) { ?>
+
+<# if (recPerRow < 1) { // Single Column #>
+<## Single column layout #>
+<#= include('./list-single-column.html') #>
+<# } else { // Multiple Column #>
+<## Multi column layout #>
+<#= include('./list-multi-column.html') #>
+<# } #>
+
+<?php } ?>
+
+<?php if (<#= totalRecs #> == 0 && !<#= currentAction #>) { // Show other options ?>
+<div class="ew-list-other-options">
+<?php $<#= pageObj #>->OtherOptions->render("body") ?>
+</div>
+<div class="clearfix"></div>
+<?php } ?>
+
+<# if (UseCustomTemplate) { #>
+<#= RenderCustomTemplate() #>
+<# } #>
+
+<# if (ctrlId == "list") { #>
+<## Page footer #>
+<#= include('shared/page-footer.html') #>
+<# } #>
+
+<# if (["list", "grid"].includes(ctrlId)) { #>
+<#= exportStart #>
+<## User events #>
+<#= include('shared/user-events.html') #>
+<## Startup JavaScript #>
+<#= include('shared/startup.js') #>
+<#= exportEnd #>
+<# } #>
+
+<## Page unload #>
+<#= include('shared/page-unload.php') #>

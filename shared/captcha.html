@@ -1,0 +1,26 @@
+<#
+    if (extCaptcha && extCaptcha.Enabled && useCaptcha) {
+        if (["add", "register", "edit", "login", "reset_password", "change_password"].includes(ctrlId)) {
+#>
+<# if (confirmCaptcha) { #>
+<?php if (!<#= isConfirm #>) { ?>
+<# } #>
+
+<!-- captcha html (begin) -->
+
+<## Captcha tag #>
+<?= Captcha()->getHtml(); ?>
+
+<# if (confirmCaptcha) { #>
+<?php } else { ?>
+<## Captcha confirm tag #>
+<?= Captcha()->getConfirmHtml(); ?>
+<?php } ?>
+<# } #>
+
+<!-- captcha html (end) -->
+
+<#
+        }
+    }
+#>

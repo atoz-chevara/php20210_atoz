@@ -1,0 +1,30 @@
+</table>
+
+<#= skipPdfExportStart #>
+</div>
+<!-- /.ew-grid-middle-panel -->
+<!-- Report grid (end) -->
+<#= skipPdfExportEnd #>
+
+<# if (bottomPageLink) { #>
+    <# if (topPageLink) { #>
+<?php if (<#= totalGrps #> > 0) { ?>
+    <# } #>
+<#= reportPagerExportStart #>
+<!-- Bottom pager -->
+<div class="card-footer ew-grid-lower-panel">
+<form name="ew-pager-form" class="form-inline ew-form ew-pager-form" action="<#= Code.write(Code.CurrentPageUrl(false)) #>">
+<#= Code.raw(renderPager) #>
+</form>
+<div class="clearfix"></div>
+</div>
+<#= reportPagerExportEnd #>
+    <# if (topPageLink) { #>
+<?php } ?>
+    <# } #>
+<# } // End bottom page link #>
+
+<#= skipPdfExportStart #>
+</div>
+<!-- /.ew-grid -->
+<#= skipPdfExportEnd #>

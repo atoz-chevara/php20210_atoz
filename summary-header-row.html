@@ -1,0 +1,36 @@
+	<!-- Table header -->
+    <tr class="ew-table-header">
+    <#
+        for (let grpFld of groupFields) {
+            FIELD = grpFld;
+            let fldName = grpFld.FldName, fldVar = grpFld.FldVar, fldParm = grpFld.FldParm, fldObj = Code.fldObj(),
+                classId = tblVar + "_" + fldParm,
+                visible = Code.getName(fldObj, Code.Field.Visible),
+                headerCellClass = Code.getName(fldObj, Code.Field.HeaderCellClass),
+                renderSort = Code.getName(pageObj, "renderSort(" + Code.getName(fldObj) + ")");
+    #>
+<?php if (<#= visible #>) { ?>
+    <?php if ($<#= fldObj #>->ShowGroupHeaderAsRow) { ?>
+    <th data-name="<#= fldParm #>">&nbsp;</th>
+    <?php } else { ?>
+    <th data-name="<#= fldParm #>" class="<#= Code.write(headerCellClass) #>"<#= FieldHeaderAttributes(grpFld) #>><div class="<#= classId #>"><?= <#= renderSort #> ?></div></th>
+    <?php } ?>
+<?php } ?>
+    <#
+        };
+
+        for (let dtlFld of detailFields) {
+            FIELD = dtlFld;
+            let fldName = dtlFld.FldName, fldVar = dtlFld.FldVar, fldParm = dtlFld.FldParm, fldObj = Code.fldObj(),
+                classId = tblVar + "_" + fldParm,
+                visible = Code.getName(fldObj, Code.Field.Visible),
+                headerCellClass = Code.getName(fldObj, Code.Field.HeaderCellClass),
+                renderSort = Code.getName(pageObj, "renderSort(" + Code.getName(fldObj) + ")");
+    #>
+<?php if (<#= visible #>) { ?>
+    <th data-name="<#= fldParm #>" class="<#= Code.write(headerCellClass) #>"<#= FieldHeaderAttributes(dtlFld) #>><div class="<#= classId #>"><?= <#= renderSort #> ?></div></th>
+<?php } ?>
+    <#
+        } // End for
+    #>
+    </tr>

@@ -1,0 +1,43 @@
+<?php
+    $<#= pageObj #>->resetAttributes();
+    $<#= pageObj #>->RowType = ROWTYPE_TOTAL;
+    $<#= pageObj #>->RowTotalType = ROWTOTAL_GRAND;
+    $<#= pageObj #>->RowTotalSubType = ROWTOTAL_FOOTER;
+    $<#= pageObj #>->RowAttrs["class"] = "ew-rpt-grand-summary";
+    $<#= pageObj #>->renderRow();
+?>
+    <tr<?= $<#= pageObj #>->rowAttributes(); ?>>
+    <#
+        groupFields.forEach((grpFld, i) => {
+            let fldParm = grpFld.FldParm,
+                grpFldObj = Code.fldObj(grpFld);
+            if (i == 0) {
+    #>
+        <td><#= Code.raw(Code.languagePhrase("RptGrandSummary")) #>&nbsp;<span class="ew-detail-count">(<?= FormatNumber($<#= pageObj #>->TotalCount, 0); ?><#= Code.raw(Code.languagePhrase("RptDtlRec")) #>)</span></td>
+    <#
+            } else {
+    #>
+<?php if ($<#= grpFldObj #>->Visible) { ?>
+        <td data-field="<#= fldParm #>">&nbsp;</td>
+<?php } ?>
+    <#
+            }
+        }); // End for grpFld
+
+        for (let dtlFld of detailFields) {
+            FIELD = dtlFld;
+            let fldName = dtlFld.FldName,
+                fldObj = Code.fldObj(dtlFld),
+                fldParm = dtlFld.FldParm,
+                smryTypes = dtlFld.SummaryTypes;
+            let visible = Code.getName(fldObj, Code.Field.Visible);
+            for (let smryType of smryTypes) {
+    #>
+<?php if (<#= visible #>) { ?>
+        <td data-field="<#= fldParm #>"<?= $<#= fldObj #>->cellAttributes() ?>><#= FieldSummaryView({ smry: "grand", id: smryType, lvl: 0 }) #></td>
+<?php } ?>
+    <#
+            }
+        } // End for dtlFld
+    #>
+    </tr>

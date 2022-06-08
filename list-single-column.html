@@ -1,0 +1,230 @@
+<#
+    let mainTableClass = (UseCustomTemplate) ? " d-none" : "";
+#>
+<div class="card ew-card ew-grid<?php if (<#= isAddOrEdit #>) { ?> ew-grid-add-edit<?php } ?> <#= tblVar #>">
+
+<## Upper panel #>
+<# if (topPageLink) { #>
+<#= include('shared/list-upper-panel.html') #>
+<# } #>
+
+<## Form head #>
+<#= include('shared/list-form-head.html') #>
+
+<div id="gmp_<#= tblVar #>" class="<#= Code.write("ResponsiveTableClass()") #>card-body ew-grid-middle-panel">
+
+<# if (ctrlId != "grid") { #>
+    <# if (inlineAdd || inlineCopy) { #>
+<?php if (<#= totalRecs #> > 0 || <#= isAdd #> || <#= isCopy #> || <#= isGridEdit #>) { ?>
+    <# } else { #>
+<?php if (<#= totalRecs #> > 0 || <#= isGridEdit #>) { ?>
+    <# } #>
+<# } #>
+
+<table id="<#= tableIdBase #>" class="<#= tableClass #><#= mainTableClass #>"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+<?php
+// Header row
+<#= rowType #> = ROWTYPE_HEADER;
+
+// Render list options
+$<#= pageObj #>->renderListOptions();
+
+// Render list options (header, left)
+<# if (UseCustomTemplate) { #>
+$<#= pageObj #>->ListOptions->render("header", "left", "", "<#= customListOptionsHeader #>", $<#= pageObj #>->TableVar, "<#= templateClass #>");
+<# } else { #>
+$<#= pageObj #>->ListOptions->render("header", "left");
+<# } #>
+
+?>
+
+<#
+    for (let f of currentFields) {
+        FIELD = f;
+        let fldName = f.FldName, fldParm = f.FldParm, fldObj = Code.fldObj(),
+            renderSort = Code.getName(pageObj, "renderSort(" + Code.getName(fldObj) + ")"),
+            classId = tblVar + "_" + fldParm,
+            headerSpanId = "elh_" + classId,
+            visible = Code.getName(fldObj, Code.Field.Visible),
+            headerCellClass = Code.getName(fldObj, Code.Field.HeaderCellClass);
+#>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+        <th data-name="<#= fldParm #>" class="<#= Code.write(headerCellClass) #>"<#= FieldHeaderAttributes(f) #>><div id="<#= headerSpanId #>" class="<#= classId #>"><?= <#= renderSort #> ?></div></th>
+<?php } ?>
+<#
+    } // Field
+#>
+
+<?php
+// Render list options (header, right)
+<# if (UseCustomTemplate) { #>
+$<#= pageObj #>->ListOptions->render("header", "right", "", "<#= customListOptionsHeader #>", $<#= pageObj #>->TableVar, "<#= templateClass #>");
+<# } else { #>
+$<#= pageObj #>->ListOptions->render("header", "right");
+<# } #>
+?>
+
+    </tr>
+</thead>
+<tbody>
+
+<# if (ctrlId == "list" && (inlineAdd || inlineCopy)) { #>
+<## Inline add #>
+<# GenerateTemplateLine = false; #>
+<#= include('shared/list-inline-add.html') #>
+<# } #>
+
+<## Load records script start #>
+<#= include('shared/list-load-records-script-start.php') #>
+
+    <tr <#= Code.raw(rowAttributes) #>>
+
+<?php
+// Render list options (body, left)
+<# if (UseCustomTemplate) { #>
+$<#= pageObj #>->ListOptions->render("body", "left", <#= rowCnt #>, "<#= customListOptionsBody #>", $<#= pageObj #>->TableVar, "<#= templateClass #>");
+<# } else { #>
+$<#= pageObj #>->ListOptions->render("body", "left", <#= rowCnt #>);
+<# } #>
+?>
+
+<#
+    for (let f of currentFields) {
+        FIELD = f;
+        let fldName = f.FldName,
+            fldParm = f.FldParm,
+            fldVar = f.FldVar,
+            fldObj = Code.fldObj(),
+            visible = Code.getName(fldObj, Code.Field.Visible),
+            cellAttributes = Code.getName(fldObj, Code.Field.CellAttributes);
+#>
+    <?php if (<#= visible #>) { // <#= fldName #> ?>
+        <td data-name="<#= fldParm #>" <#= Code.raw(cellAttributes) #>><#= FieldList() #></td>
+    <#
+        if (listEdit && keyFields.some(kf => fldName == kf.FldName)) { // Generate primary key fields for inline edit/grid edit
+            fldVar = RowVar(fldVar);
+    #>
+    <?php } else { ?>
+            <#= FieldEditHidden({ ctl: fldVar, cv: Code.getName(fldObj, Code.Field.CurrentValue) }) #>
+    <#
+        }
+    #>
+    <?php } ?>
+<#
+    } // Field
+#>
+
+<?php
+// Render list options (body, right)
+<# if (UseCustomTemplate) { #>
+$<#= pageObj #>->ListOptions->render("body", "right", <#= rowCnt #>, "<#= customListOptionsBody #>", $<#= pageObj #>->TableVar, "<#= templateClass #>");
+<# } else { #>
+$<#= pageObj #>->ListOptions->render("body", "right", <#= rowCnt #>);
+<# } #>
+?>
+    </tr>
+
+<## Load records script end #>
+<#= include('shared/list-load-records-script-end.php') #>
+
+<# if (!UseCustomTemplate) { #>
+    <# if (ctrlId == "grid" || ctrlId == "list" && gridAddOrEdit) { #>
+<## Inline add #>
+<# GenerateTemplateLine = true; #>
+<#= include('shared/list-inline-add.html') #>
+    <# } #>
+<# } #>
+
+</tbody>
+
+<# if (IsAggregate()) { // Aggregate Footer #>
+
+<?php
+// Render aggregate row
+<#= rowType #> = ROWTYPE_AGGREGATE;
+$<#= pageObj #>->resetAttributes();
+$<#= pageObj #>->renderRow();
+?>
+<# if (ctrlId == "list") { #>
+<?php if (<#= totalRecs #> > 0 && !<#= isGridAdd #> && !<#= isGridEdit #>) { ?>
+<# } else { #>
+<?php if (<#= totalRecs #> > 0 && <#= currentMode #> == "view") { ?>
+<# } #>
+<tfoot><!-- Table footer -->
+    <tr class="ew-table-footer">
+
+<?php
+// Render list options
+$<#= pageObj #>->renderListOptions();
+
+// Render list options (footer, left)
+<# if (UseCustomTemplate) { #>
+$<#= pageObj #>->ListOptions->render("footer", "left", "", "<#= customListOptionsFooter #>", $<#= pageObj #>->TableVar, "<#= templateClass #>");
+<# } else { #>
+$<#= pageObj #>->ListOptions->render("footer", "left");
+<# } #>
+?>
+
+<#
+    for (let f of currentFields) {
+        FIELD = f;
+        let fldName = f.FldName, fldParm = f.FldParm, fldObj = Code.fldObj(),
+            footerSpanId = "elf_" + tblVar + "_" + fldParm,
+            classId = tblVar + "_" + fldParm,
+            visible = Code.getName(fldObj, Code.Field.Visible),
+            footerCellClass = Code.getName(fldObj, Code.Field.FooterCellClass);
+#>
+    <?php if (<#= visible #>) { // <#= fldName #> ?>
+        <td data-name="<#= fldParm #>" class="<#= Code.raw(footerCellClass) #>"><span id="<#= footerSpanId #>" class="<#= classId #>">
+    <# if (!IsEmpty(f.FldAggregate)) { #>
+        <#= FieldAggregate() #>
+    <# } else { #>
+        &nbsp;
+    <# } #>
+        </span></td>
+    <?php } ?>
+<#
+    } // Field
+#>
+
+<?php
+// Render list options (footer, right)
+<# if (UseCustomTemplate) { #>
+$<#= pageObj #>->ListOptions->render("footer", "right", "", "<#= customListOptionsFooter #>", $<#= pageObj #>->TableVar, "<#= templateClass #>");
+<# } else { #>
+$<#= pageObj #>->ListOptions->render("footer", "right");
+<# } #>
+?>
+
+    </tr>
+</tfoot>
+<?php } ?>
+
+<# } // Aggregate Footer #>
+
+</table><!-- /.ew-table -->
+
+<# if (ctrlId != "grid") { #>
+<?php } ?>
+<# } #>
+
+<# if (UseCustomTemplate) { #>
+<#= GetCustomTemplate() #>
+<# } #>
+
+</div><!-- /.ew-grid-middle-panel -->
+
+<## Form end #>
+<#= include('shared/list-form-foot.html') #>
+
+<## Close recordset #>
+<#= include('shared/list-close-recordset-script.php') #>
+
+<## Lower panel #>
+<# if (bottomPageLink || !topPageLink) { #>
+<#= include('shared/list-lower-panel.html') #>
+<# } #>
+
+</div><!-- /.ew-grid -->

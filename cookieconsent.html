@@ -1,0 +1,34 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+<?php namespace <#= ProjectNamespace #>; ?>
+<?php if (!CanTrackCookie()) { ?>
+<div id="cookie-consent" class="d-none">
+    <div class="mr-3 mb-3"><#= Code.raw(Code.languagePhrase("CookieConsentSummary")) #></div>
+    <div class="text-nowrap">
+        <button type="button" class="<#= Code.write(Code.Config.CookieConsentButtonClass) #>" data-action="<#= GetRouteUrl("privacy") #>"><#= Code.raw(Code.languagePhrase("LearnMore")) #></button>
+        <button type="button" class="<#= Code.write(Code.Config.CookieConsentButtonClass) #>" data-cookie-string="<#= Code.write(Code.htmlEncode(Code.CreateConsentCookie)) #>"><#= Code.raw(Code.languagePhrase("Accept")) #></button>
+    </div>
+</div>
+<script>
+loadjs.ready("load", function() {
+    var $ = jQuery;
+    var $toast = ew.toast({
+        class: "ew-toast <#= Code.write(Code.Config.CookieConsentClass) #>",
+        title: ew.language.phrase("CookieConsentTitle"),
+        body: $("#cookie-consent").html(),
+        close: true,
+        autohide: false,
+        delay: 0
+    });
+     // Accept button
+    $toast.find("button[data-cookie-string]").on("click", function(e) {
+        document.cookie = $(e.target).data("cookie-string");
+        $toast.toast("hide");
+    });
+    // Learn more button
+    $toast.find("button[data-action]").on("click", function(e) {
+        window.location = ew.PATH_BASE + $(e.target).data("action");
+    });
+});
+</script>
+<?php } ?>

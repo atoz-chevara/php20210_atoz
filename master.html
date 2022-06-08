@@ -1,0 +1,115 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+
+<## Common table config #>
+<#= include('shared/config-table.php') #>
+
+<#
+    let mainTableClass = (UseCustomTemplate) ? " d-none" : "",
+        tblVisible = Code.getName(tblVar, Code.Visible);
+#>
+<?php
+
+namespace <#= ProjectNamespace #>;
+
+// Table
+$<#= tblVar #> = Container("<#= tblVar #>");
+<#
+    for (let f of currentFields) {
+        FIELD = f;
+        let script = ScriptCommon();
+        if (script) {
+#>
+// <#= f.FldName #>
+<#= script #>
+<#
+        }
+    } // Field
+#>
+?>
+<?php if (<#= tblVisible #>) { ?>
+
+<# if (showVerticalMasterRecord) { #>
+
+<div class="ew-master-div">
+<table id="<#= tableIdBase #>" class="table ew-view-table ew-master-table ew-vertical<#= mainTableClass #>">
+    <tbody>
+    <#
+        for (let f of currentFields) {
+            FIELD = f;
+            let fldName = f.FldName,
+                fldParm = f.FldParm,
+                fldObj = Code.fldObj(),
+                visible = Code.getName(fldObj, Code.Field.Visible),
+                cellAttributes = Code.getName(fldObj, Code.Field.CellAttributes);
+        #>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+        <tr id="r_<#= fldParm #>">
+            <td class="<#= Code.write(pageTableLeftColumnClass) #>"><#= FieldCaption() #></td>
+            <td <#= Code.raw(cellAttributes) #>><#= FieldView() #></td>
+        </tr>
+<?php } ?>
+    <#
+        } // Field
+    #>
+    </tbody>
+</table>
+</div>
+
+<# } else { #>
+
+<div id="t_<#= tblVar #>" class="card <#= Code.write("ResponsiveTableClass()") #>ew-grid ew-list-form ew-master-div<#= mainTableClass #>">
+<table id="<#= tableIdBase #>" class="<#= tableClass #> ew-master-table ew-horizontal">
+    <thead>
+        <tr class="ew-table-header">
+    <#
+        for (let f of currentFields) {
+            FIELD = f;
+            let fldName = f.FldName,
+                fldParm = f.FldParm,
+                fldObj = Code.fldObj(),
+                visible = Code.getName(fldObj, Code.Field.Visible),
+                headerCellClass = Code.getName(fldObj, Code.Field.HeaderCellClass);
+    #>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+            <th class="<#= Code.write(headerCellClass) #>"><#= FieldCaption() #></th>
+<?php } ?>
+    <#
+        } // Field
+    #>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+    <#
+        for (let f of currentFields) {
+            FIELD = f;
+            let fldName = f.FldName,
+                fldParm = f.FldParm,
+                fldObj = Code.fldObj(),
+                visible = Code.getName(fldObj, Code.Field.Visible),
+                cellAttributes = Code.getName(fldObj, Code.Field.CellAttributes);
+    #>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+            <td <#= Code.raw(cellAttributes) #>><#= FieldView() #></td>
+<?php } ?>
+    <#
+        } // Field
+    #>
+        </tr>
+    </tbody>
+</table>
+</div>
+
+<# } #>
+
+<# if (UseCustomTemplate) { #>
+<#= GetCustomTemplate() #>
+<# } #>
+
+<# if (UseCustomTemplate) { #>
+<# PageObject = tblVar; #>
+<#= RenderCustomTemplate() #>
+<# } #>
+
+<?php } ?>

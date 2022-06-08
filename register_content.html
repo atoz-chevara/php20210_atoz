@@ -1,0 +1,11 @@
+<#
+    let table = GetTableObject(PROJ.SecTbl);
+    for (let f of table.Fields) {
+        if (f.FldGenerate && f.FldRegister && f.FldName != PROJ.SecPasswdFld && f.FldName != DB.SecUserLevelFld) {
+            let fldName = f.FldName;
+#>
+<p><!--FieldCaption_<#= fldName #>-->: <!--<#= fldName #>--></p>
+<#
+        }
+    } // Field
+#>

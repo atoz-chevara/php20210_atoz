@@ -1,0 +1,42 @@
+<#
+    // Hide page total if grand total = page total
+    let checkPageTotalStart = "",
+        checkPageTotalEnd = "";
+    if (TABLE.TblRptShowGrandTotal) {
+        checkPageTotalStart = Code.if(`(${stopGrp} - ${startGrp} + 1) != ${totalGrps}`);
+        checkPageTotalEnd = Code.end;
+    }
+#>
+<#= checkPageTotalStart #>
+
+<?php
+    $<#= pageObj #>->resetAttributes();
+    $<#= pageObj #>->RowType = ROWTYPE_TOTAL;
+    $<#= pageObj #>->RowTotalType = ROWTOTAL_PAGE;
+    $<#= pageObj #>->RowAttrs["class"] = "ew-rpt-page-summary";
+    $<#= pageObj #>->renderRow();
+?>
+    <!-- Page Summary -->
+    <tr<?= $<#= pageObj #>->rowAttributes(); ?>>
+<?php if ($<#= pageObj #>->GroupColumnCount > 0) { ?>
+    <td colspan="<?= $<#= pageObj #>->GroupColumnCount ?>"><?= $<#= pageObj #>->renderSummaryCaptions("page") ?></td>
+<?php } ?>
+
+<!-- Dynamic columns begin -->
+<?php
+    $cntcol = count($<#= pageObj #>->SummaryViewValues);
+    for ($iy = 1; $iy <= $cntcol; $iy++) {
+        $colShow = ($iy <= $<#= pageObj #>->ColumnCount) ? $<#= pageObj #>->Columns[$iy]->Visible : true;
+        $colDesc = ($iy <= $<#= pageObj #>->ColumnCount) ? $<#= pageObj #>->Columns[$iy]->Caption : $Language->phrase("Summary");
+        if ($colShow) {
+?>
+        <!-- <?= $colDesc; ?> -->
+        <td<?= $<#= pageObj #>->summaryCellAttributes($iy-1) ?>><?= $<#= pageObj #>->renderSummaryFields($iy-1) ?></td>
+<?php
+        }
+    }
+?>
+<!-- Dynamic columns end -->
+    </tr>
+
+<#= checkPageTotalEnd #>

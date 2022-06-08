@@ -1,0 +1,27 @@
+<# if (bottomCharts.length > 0) { #>
+
+<#= showReportContainerStart #>
+<!-- Bottom Container -->
+<div class="row">
+    <div id="ew-bottom" class="<#= Code.write(reportBottomContentClass) #>">
+<#= showReportContainerEnd #>
+
+<#
+    // Generate charts (on bottom)
+    bottomCharts.forEach((c, i) => {
+        CHART = c;
+        chartIndex = i;
+#>
+<## render chart #>
+<#= include('./chart-render.html') #>
+<#
+    }); // End for, charts on bottom
+#>
+
+<#= showReportContainerStart #>
+    </div>
+</div>
+<!-- /#ew-bottom -->
+<#= showReportContainerEnd #>
+
+<# } #>

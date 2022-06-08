@@ -1,0 +1,243 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+
+<## Common table config #>
+<#= include('shared/config-table.php') #>
+
+<## Page load #>
+<#= include('shared/page-load.php') #>
+
+<#= exportStart #>
+<## Local JavaScript #>
+<#= include('shared/local.js') #>
+
+<## Client JavaScript #>
+<#= include('shared/client.js') #>
+<#= exportEnd #>
+
+<script>
+if (!ew.vars.tables.<#= tblVar #>) ew.vars.tables.<#= tblVar #> = <#= Code.write(Code.toJson(`GetClientVar("tables", "${tblVar}")`)) #>;
+</script>
+
+<#= exportStart #>
+<div class="btn-toolbar ew-toolbar">
+<?php $<#= pageObj #>->ExportOptions->render("body") ?>
+<?php $<#= pageObj #>->OtherOptions->render("body") ?>
+<div class="clearfix"></div>
+</div>
+<#= exportEnd #>
+
+<## Page header #>
+<#= include('shared/page-header.html') #>
+
+<## Show message #>
+<#= include('shared/show-message.html') #>
+
+<# if (detailViewPaging && topPageLink) { #>
+<?php if (!<#= isModal #>) { ?>
+<#= exportStart #>
+<form name="ew-pager-form" class="form-inline ew-form ew-pager-form" action="<#= Code.write(Code.CurrentPageUrl(false)) #>">
+<#= Code.raw(renderPager) #>
+<div class="clearfix"></div>
+</form>
+<#= exportEnd #>
+<?php } ?>
+<# } #>
+
+<form name="<#= formName #>" id="<#= formName #>" class="form-inline ew-form ew-view-form" action="<#= Code.write(Code.CurrentPageUrl(false)) #>" method="post"<#= formNoValidate #>>
+
+<## Token tag #>
+<#= include('shared/token-tag.html') #>
+
+<input type="hidden" name="t" value="<#= tblVar #>">
+<input type="hidden" name="modal" value="<#= Code.write(Code.castInt(isModal)) #>">
+
+<#
+    let mainTableClass = "",
+        pageTableClass = "";
+
+    if (UseCustomTemplate) {
+        if (!UseCustomMultiPageTemplate)
+            mainTableClass = " d-none";
+        pageTableClass = " d-none";
+    }
+
+    // Field with page index = 0
+    if (useMultiPage && hasMultiPageZero) {
+        let tableId = tableIdBase + "0",
+            pageVisible = Code.getName(pageObj, Code.multiPagesItems(0), Code.Visible);
+#>
+<?php if (<#= pageVisible #>) { ?>
+<table class="<#= tableClass #><#= pageTableClass #>">
+
+<#
+        for (let f of currentFields) {
+            if (f.FldPageIndex == 0) {
+                FIELD = f;
+#>
+<## Field layout #>
+<#= include('shared/view-field-layout.html') #>
+<#
+            }
+        } // Field
+#>
+</table>
+
+<# if (UseCustomTemplate) { #>
+<#= GetCustomTemplate() #>
+<# } #>
+
+<?php } ?>
+<#
+    }
+#>
+
+<#
+    // Multi page
+    if (useMultiPage) {
+        let navStyle = Code.getName(pageObj, Code.MultiPages, Code.NavStyle);
+#>
+<?php if (!<#= isExport #>) { ?>
+<div class="ew-multi-page<#= mainTableClass #>">
+<# if (useAccordionForMultiPage) { #>
+<div class="accordion ew-accordion" id="<#= Code.write(Code.getName(pageObj, Code.PageObjName)) #>"><!-- multi-page accordion -->
+<# } else { #>
+<div class="ew-nav-tabs" id="<#= pageObj #>"><!-- multi-page tabs -->
+    <ul class="<#= Code.write(navStyle) #>">
+<#
+        for (let i = 1; i <= pageCount; i++) {
+            if (String(i) in pageList) {
+                let pageStyle = Code.getName(pageObj, Code.MultiPages, Code.pageStyle(i)),
+                    pageCaption = Code.getName(pageObj, Code.pageCaption(i));
+#>
+        <li class="nav-item"><a class="nav-link<#= Code.write(pageStyle) #>" href="#tab_<#= tblVar #><#= i #>" data-toggle="tab"><#= Code.raw(pageCaption) #></a></li>
+<#
+            } else {
+#>
+        <li class="nav-item d-none"><a class="nav-link" href="#tab_<#= tblVar #><#= i #>" data-toggle="tab"></a></li>
+<#
+            }
+        } // Page
+#>
+    </ul>
+    <div class="tab-content">
+<# } #>
+<?php } ?>
+<#
+    }
+#>
+
+<#
+    for (let pageidx = 1; pageidx <= pageCount; pageidx++) {
+        let tableId = tableIdBase + (useMultiPage ? pageidx : "");
+        if (useMultiPage) {
+            let pageStyle = Code.getName(pageObj, Code.MultiPages, Code.pageStyle(pageidx)),
+                isActive = Code.getName(pageObj, Code.MultiPages, Code.isActive(pageidx)),
+                pageCaption = Code.getName(pageObj, Code.pageCaption(pageidx)),
+                parent = Code.getName(pageObj, Code.MultiPages, Code.Parent);
+#>
+<?php if (!<#= isExport #>) { ?>
+<# if (useAccordionForMultiPage) { #>
+    <div class="card ew-accordion-card<#= Code.write(pageStyle) #>"><!-- multi-page accordion .card -->
+        <div class="card-header">
+            <h4 class="card-title">
+                <a data-toggle="collapse" role="button" class="collapsed" aria-expanded="<#= Code.write(Code.jsonEncode(isActive)) #>" href="#tab_<#= tblVar #><#= pageidx #>"><#= Code.write(pageCaption) #></a>
+            </h4>
+        </div>
+        <div class="collapse<#= Code.write(pageStyle) #>" data-parent="<#= Code.write(parent) #>" id="tab_<#= tblVar #><#= pageidx #>">
+            <div class="card-body"><!-- multi-page accordion .card-body -->
+<# } else { #>
+        <div class="tab-pane<#= Code.write(pageStyle) #>" id="tab_<#= tblVar #><#= pageidx #>"><!-- multi-page .tab-pane -->
+<# } #>
+<?php } ?>
+<#
+        }
+        if (!TABLE.TblMultiPageView || TABLE.TblMultiPageView && String(pageidx) in pageList) {
+#>
+<table class="<#= tableClass #><#= pageTableClass #>">
+
+<#
+        for (let f of currentFields) {
+            if (!TABLE.TblMultiPageView || (TABLE.TblMultiPageView && f.FldPageIndex == pageidx)) {
+                FIELD = f;
+#>
+<## Field layout #>
+<#= include('shared/view-field-layout.html') #>
+<#
+            }
+        } // Field
+#>
+
+</table>
+
+<# if (useMultiPage && UseCustomMultiPageTemplate) { #>
+<#= GetCustomTemplatePage(pageidx) #>
+<# } #>
+
+<#
+        }
+        if (useMultiPage) {
+#>
+<?php if (!<#= isExport #>) { ?>
+<# if (useAccordionForMultiPage) { #>
+            </div>
+        </div>
+    </div>
+<# } else { #>
+        </div>
+<# } #>
+<?php } ?>
+<#
+        }
+    } // Page
+#>
+
+<#
+    // Multi page
+    if (useMultiPage) {
+#>
+<?php if (!<#= isExport #>) { ?>
+<# if (useAccordionForMultiPage) { #>
+</div>
+<# } else { #>
+    </div>
+</div>
+<# } #>
+</div>
+<?php } ?>
+<#
+    }
+#>
+
+<# if (!useMultiPage && UseCustomTemplate) { #>
+<#= GetCustomTemplate() #>
+<# } #>
+
+<# if (detailViewPaging && bottomPageLink) { #>
+<?php if (!<#= isModal #>) { ?>
+<#= exportStart #>
+<#= Code.raw(renderPager) #>
+<div class="clearfix"></div>
+<#= exportEnd #>
+<?php } ?>
+<# } #>
+
+<## Detail grid #>
+<#= include('shared/detail-grid.html') #>
+
+</form>
+
+<# if (UseCustomTemplate) { #>
+<#= RenderCustomTemplate() #>
+<# } #>
+
+<## Page footer #>
+<#= include('shared/page-footer.html') #>
+
+<#= exportStart #>
+<## Startup JavaScript #>
+<#= include('shared/startup.js') #>
+<#= exportEnd #>
+
+<## Page unload #>
+<#= include('shared/page-unload.php') #>

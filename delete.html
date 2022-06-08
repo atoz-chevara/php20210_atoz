@@ -1,0 +1,135 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+
+<## Common table config #>
+<#= include('shared/config-table.php') #>
+
+<## Page load #>
+<#= include('shared/page-load.php') #>
+
+<## Local JavaScript #>
+<#= include('shared/local.js') #>
+
+<## Client JavaScript #>
+<#= include('shared/client.js') #>
+
+<script>
+if (!ew.vars.tables.<#= tblVar #>) ew.vars.tables.<#= tblVar #> = <#= Code.write(Code.toJson(`GetClientVar("tables", "${tblVar}")`)) #>;
+</script>
+
+<## Page header #>
+<#= include('shared/page-header.html') #>
+
+<## Show message #>
+<#= include('shared/show-message.html') #>
+
+<form name="<#= formName #>" id="<#= formName #>" class="form-inline ew-form ew-delete-form" action="<#= Code.write(Code.CurrentPageUrl(false)) #>" method="post"<#= formNoValidate #>>
+
+<## Token tag #>
+<#= include('shared/token-tag.html') #>
+
+<input type="hidden" name="t" value="<#= tblVar #>">
+<input type="hidden" name="action" id="action" value="delete">
+<?php foreach ($<#= pageObj #>->RecKeys as $key) { ?>
+<?php $keyvalue = is_array($key) ? implode(Config("COMPOSITE_KEY_SEPARATOR"), $key) : $key; ?>
+<input type="hidden" name="key_m[]" value="<?= HtmlEncode($keyvalue) ?>">
+<?php } ?>
+
+<#
+    let mainTableClass = (UseCustomTemplate) ? " d-none" : "";
+#>
+
+<div class="card ew-card ew-grid<#= mainTableClass #>">
+<div class="<#= Code.write("ResponsiveTableClass()") #>card-body ew-grid-middle-panel">
+<table class="<#= tableClass #>">
+    <thead>
+    <tr class="ew-table-header">
+
+<#
+    for (let f of currentFields) {
+        FIELD = f;
+        let fldParm = f.FldParm, fldVar = f.FldVar, fldObj = Code.fldObj(), fldName = FIELD.FldName,
+            headerSpanId = "elh_" + tblVar + "_" + fldParm,
+            classId = tblVar + "_" + fldParm,
+            visible = Code.getName(fldObj, Code.Field.Visible),
+            headerCellClass = Code.getName(fldObj, Code.Field.HeaderCellClass);
+#>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+        <th class="<#= Code.raw(headerCellClass) #>"><span id="<#= headerSpanId #>" class="<#= classId #>"><#= FieldCaption() #></span></th>
+<?php } ?>
+<#
+    } // Field
+#>
+    </tr>
+    </thead>
+    <tbody>
+<?php
+<#= recCnt #> = 0;
+$i = 0;
+while (!$<#= pageObj #>->Recordset->EOF) {
+
+    <#= recCnt #>++;
+    <#= rowCnt #>++;
+
+    // Set row properties
+    $<#= pageObj #>->resetAttributes();
+    <#= rowType #> = ROWTYPE_VIEW; // View
+
+    // Get the field contents
+    $<#= pageObj #>->loadRowValues($<#= pageObj #>->Recordset);
+
+    // Render row
+    $<#= pageObj #>->renderRow();
+?>
+
+    <tr <#= Code.raw(rowAttributes) #>>
+<#
+    for (let f of currentFields) {
+        FIELD = f;
+        let fldParm = f.FldParm, fldVar = f.FldVar, fldObj = Code.fldObj(), fldName = f.FldName,
+            visible = Code.getName(fldObj, Code.Field.Visible),
+            cellAttributes = Code.getName(fldObj, Code.Field.CellAttributes);
+#>
+<?php if (<#= visible #>) { // <#= fldName #> ?>
+        <td <#= Code.raw(cellAttributes) #>><#= FieldView() #></td>
+<?php } ?>
+<#
+    } // Field
+#>
+    </tr>
+
+<?php
+    $<#= pageObj #>->Recordset->moveNext();
+}
+
+$<#= pageObj #>->Recordset->close();
+?>
+
+</tbody>
+</table>
+</div>
+</div>
+
+<# if (UseCustomTemplate) { #>
+<#= GetCustomTemplate() #>
+<# } #>
+
+<div>
+<button class="<#= submitButtonClass #>" name="btn-action" id="btn-action" type="submit"><#= Code.raw(Code.languagePhrase("DeleteBtn")) #></button>
+<button class="<#= cancelButtonClass #>" name="btn-cancel" id="btn-cancel" type="button" data-href="<#= Code.writePath(returnUrl) #>"><#= Code.raw(Code.languagePhrase("CancelBtn")) #></button>
+</div>
+
+</form>
+
+<# if (UseCustomTemplate) { #>
+<#= RenderCustomTemplate() #>
+<# } #>
+
+<## Page footer #>
+<#= include('shared/page-footer.html') #>
+
+<## Startup JavaScript #>
+<#= include('shared/startup.js') #>
+
+<## Page unload #>
+<#= include('shared/page-unload.php') #>

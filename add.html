@@ -1,0 +1,409 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+
+<## Common table config #>
+<#= include('shared/config-table.php') #>
+
+<## Page load #>
+<#= include('shared/page-load.php') #>
+
+<## Local JavaScript #>
+<#= include('shared/local.js') #>
+
+<## Client JavaScript #>
+<#= include('shared/client.js') #>
+
+<## Page header #>
+<#= include('shared/page-header.html') #>
+
+<## Show message #>
+<#= include('shared/show-message.html') #>
+
+<form name="<#= formName #>" id="<#= formName #>" class="<#= Code.write(formClassName) #>" action="<#= Code.write(Code.CurrentPageUrl(false)) #>" method="post"<#= formNoValidate #>>
+
+<## Token tag #>
+<#= include('shared/token-tag.html') #>
+
+<input type="hidden" name="t" value="<#= tblVar #>">
+<# if (addConfirm) { #>
+<?php if (<#= isConfirm #>) { // Confirm page ?>
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="confirm" id="confirm" value="confirm">
+<?php } else { ?>
+<input type="hidden" name="action" id="action" value="confirm">
+<?php } ?>
+<# } else { #>
+<input type="hidden" name="action" id="action" value="insert">
+<# } #>
+<input type="hidden" name="modal" value="<#= Code.write(Code.castInt(isModal)) #>">
+<input type="hidden" name="<#= Code.write(Code.getName(pageObj, Code.OldKeyName)) #>" value="<#= Code.raw(Code.getName(pageObj, Code.OldKey)) #>">
+
+<#
+    for (let md of masterTables) {
+        let masterTable = GetTableObject(md.MasterTable),
+            masterTblVar = masterTable.TblVar;
+#>
+<?php if (<#= currentMasterTable #> == "<#= masterTblVar #>") { ?>
+<input type="hidden" name="<#= Code.write(Code.Config.TableShowMaster) #>" value="<#= masterTblVar #>">
+<#
+        for (let rel of md.Relations) {
+            let masterField = GetFieldObject(masterTable, rel.MasterField),
+                masterFldParm = masterField.FldParm,
+                detailField = GetFieldObject(TABLE, rel.DetailField),
+                detailFldParm = detailField.FldParm,
+                detailFldObj = Code.fldObj(detailField),
+                sessionValue = Code.getName(detailFldObj, Code.Field.SessionValue);
+#>
+<input type="hidden" name="fk_<#= masterFldParm #>" value="<#= Code.write(Code.htmlEncode(sessionValue)) #>">
+<#
+        } // MasterDetailField
+#>
+<?php } ?>
+<#
+    } // MasterDetail
+#>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (!<#= isMobileOrModal #>) { ?>
+<div class="ew-desktop"><!-- desktop -->
+<?php } ?>
+<# } #>
+
+<#
+    let mainTableClass = "",
+        pageTableClass = "";
+
+    if (UseCustomTemplate) {
+
+        if (!UseCustomMultiPageTemplate)
+            mainTableClass = " d-none";
+        pageTableClass = " d-none";
+    }
+
+    // Field with page index = 0
+    if (useMultiPage && hasMultiPageZero) {
+        let tableId = tableIdBase + "0",
+            pageVisible = Code.getName(pageObj, Code.multiPagesItems(0), Code.Visible);
+#>
+<?php if (<#= pageVisible #>) { ?>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (<#= isMobileOrModal #>) { ?>
+<div class="<#= tableClass #><#= pageTableClass #>"><!-- page0 -->
+<?php } else { ?>
+<table id="<#= tableId #>" class="<#= desktopTableClass #><#= pageTableClass #>"><!-- page0 table -->
+<?php } ?>
+<# } else { #>
+<div class="<#= tableClass #><#= pageTableClass #>"><!-- page0 -->
+<# } #>
+
+<#
+        for (let f of currentFields) {
+            if (f.FldPageIndex == 0) {
+                FIELD = f;
+#>
+<## Field layout #>
+<#= include('shared/add-field-layout.html') #>
+<#
+            }
+        } // Field
+#>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (<#= isMobileOrModal #>) { ?>
+</div><!-- /page0 -->
+<?php } else { ?>
+</table><!-- /page0 table -->
+<?php } ?>
+<# } else { #>
+</div><!-- /page0 -->
+<# } #>
+
+<# if (UseCustomTemplate) { #>
+<#= GetCustomTemplate() #>
+<# } #>
+
+<?php } ?>
+<#
+    }
+#>
+
+<#
+    // Multi page
+    if (useMultiPage) {
+        let navStyle = Code.getName(pageObj, Code.MultiPages, Code.NavStyle);
+#>
+<div class="ew-multi-page<#= mainTableClass #>"><!-- multi-page -->
+<# if (useAccordionForMultiPage) { #>
+<div class="accordion ew-accordion" id="<#= Code.write(Code.getName(pageObj, Code.PageObjName)) #>"><!-- multi-page accordion -->
+<# } else { #>
+<div class="ew-nav-tabs" id="<#= pageObj #>"><!-- multi-page tabs -->
+    <ul class="<#= Code.write(navStyle) #>">
+<#
+        for (let i = 1; i <= pageCount; i++) {
+            if (String(i) in pageList) {
+                let pageStyle = Code.getName(pageObj, Code.MultiPages, Code.pageStyle(i)),
+                    pageCaption = Code.getName(pageObj, Code.pageCaption(i));
+#>
+        <li class="nav-item"><a class="nav-link<#= Code.write(pageStyle) #>" href="#tab_<#= tblVar #><#= i #>" data-toggle="tab"><#= Code.raw(pageCaption) #></a></li>
+<#
+            } else {
+#>
+        <li class="nav-item d-none"><a class="nav-link" href="#tab_<#= tblVar #><#= i #>" data-toggle="tab"></a></li>
+<#
+            }
+        } // Page
+#>
+    </ul>
+    <div class="tab-content"><!-- multi-page tabs .tab-content -->
+<# } #>
+<#
+    }
+#>
+
+<#
+    for (let pageidx = 1; pageidx <= pageCount; pageidx++) {
+        let tableId = tableIdBase + (useMultiPage ? pageidx : "");
+        if (useMultiPage) {
+            let pageStyle = Code.getName(pageObj, Code.MultiPages, Code.pageStyle(pageidx)),
+                isActive = Code.getName(pageObj, Code.MultiPages, Code.isActive(pageidx)),
+                pageCaption = Code.getName(pageObj, Code.pageCaption(pageidx)),
+                parent = Code.getName(pageObj, Code.MultiPages, Code.Parent);
+#>
+<# if (useAccordionForMultiPage) { #>
+<div class="card ew-accordion-card<#= Code.write(pageStyle) #>"><!-- multi-page accordion .card -->
+        <div class="card-header">
+            <h4 class="card-title">
+                <a data-toggle="collapse" role="button" class="collapsed" aria-expanded="<#= Code.write(Code.jsonEncode(isActive)) #>" href="#tab_<#= tblVar #><#= pageidx #>"><#= Code.write(pageCaption) #></a>
+            </h4>
+        </div>
+        <div class="collapse<#= Code.write(pageStyle) #>" data-parent="<#= Code.write(parent) #>" id="tab_<#= tblVar #><#= pageidx #>"><!-- multi-page accordion .collapse -->
+            <div class="card-body<# if (useTabularFormForDesktop) { #><?php if (!<#= isMobileOrModal #>) { ?> p-0<?php } ?><# } #>"><!-- multi-page accordion .card-body -->
+<# } else { #>
+        <div class="tab-pane<#= Code.write(pageStyle) #>" id="tab_<#= tblVar #><#= pageidx #>"><!-- multi-page .tab-pane -->
+<# } #>
+<#
+        }
+        if (!TABLE.TblMultiPageAdd || String(pageidx) in pageList) {
+#>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (<#= isMobileOrModal #>) { ?>
+<div class="<#= tableClass #><#= pageTableClass #>"><!-- page* -->
+<?php } else { ?>
+<table id="<#= tableId #>" class="<#= desktopTableClass #><#= pageTableClass #>"><!-- table* -->
+<?php } ?>
+<# } else { #>
+<div class="<#= tableClass #><#= pageTableClass #>"><!-- page* -->
+<# } #>
+
+<#
+        for (let f of currentFields) {
+            if (!TABLE.TblMultiPageAdd || (TABLE.TblMultiPageAdd && f.FldPageIndex == pageidx)) {
+                FIELD = f;
+#>
+<## Field layout #>
+<#= include('shared/add-field-layout.html') #>
+<#
+            }
+        } // Field
+
+        if (isDynamicUserLevel && TABLE.TblName == DB.UserLevelTbl) {
+#>
+    <!-- row for permission values -->
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (<#= isMobileOrModal #>) { ?>
+<# } #>
+
+    <div id="rp_permission" class="form-group row">
+        <label id="elh_permission" class="<#= Code.write(pageLeftColumnClass) #>"><#= Code.write(Code.htmlTitle(Code.languagePhrase("Permission"))) #></label>
+        <div class="<#= Code.write(pageRightColumnClass) #>">
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowAdd" id="Add" value="<#= Code.write(Code.Config.AllowAdd) #>"><label class="custom-control-label" for="Add"><#= Code.raw(Code.languagePhrase("PermissionAdd")) #></label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowDelete" id="Delete" value="<#= Code.write(Code.Config.AllowDelete) #>"><label class="custom-control-label" for="Delete"><#= Code.raw(Code.languagePhrase("PermissionDelete")) #></label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowEdit" id="Edit" value="<#= Code.write(Code.Config.AllowEdit) #>"><label class="custom-control-label" for="Edit"><#= Code.raw(Code.languagePhrase("PermissionEdit")) #></label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowList" id="List" value="<#= Code.write(Code.Config.AllowList) #>"><label class="custom-control-label" for="List"><#= Code.raw(Code.languagePhrase("PermissionList")) #></label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowLookup" id="Lookup" value="<#= Code.write(Code.Config.AllowLookup) #>"><label class="custom-control-label" for="Lookup"><#= Code.raw(Code.languagePhrase("PermissionLookup")) #></label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowView" id="View" value="<#= Code.write(Code.Config.AllowView) #>"><label class="custom-control-label" for="View"><#= Code.raw(Code.languagePhrase("PermissionView")) #></label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowSearch" id="Search" value="<#= Code.write(Code.Config.AllowSearch) #>"><label class="custom-control-label" for="Search"><#= Code.raw(Code.languagePhrase("PermissionSearch")) #></label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowImport" id="Import" value="<#= Code.write(Code.Config.AllowImport) #>"><label class="custom-control-label" for="Import"><#= Code.raw(Code.languagePhrase("PermissionImport")) #></label>
+            </div>
+<?php if (IsSysAdmin()) { ?>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowAdmin" id="Admin" value="<#= Code.write(Code.Config.AllowAdmin) #>"><label class="custom-control-label" for="Admin"><#= Code.raw(Code.languagePhrase("PermissionAdmin")) #></label>
+            </div>
+<?php } ?>
+        </div>
+    </div>
+
+<# if (useTabularFormForDesktop) { #>
+<?php } else { ?>
+    <tr id="rp_permission">
+        <td class="<#= Code.write(pageTableLeftColumnClass) #>"><span id="elh_permission"><#= Code.write(Code.htmlTitle(Code.languagePhrase("Permission"))) #></span></td>
+        <td>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowAdd" id="Add" value="<#= Code.write(Code.Config.AllowAdd) #>" /><label class="custom-control-label" for="Add"><#= Code.raw(Code.languagePhrase("PermissionAdd")) #></label>
+                </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowDelete" id="Delete" value="<#= Code.write(Code.Config.AllowDelete) #>" /><label class="custom-control-label" for="Delete"><#= Code.raw(Code.languagePhrase("PermissionDelete")) #></label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowEdit" id="Edit" value="<#= Code.write(Code.Config.AllowEdit) #>" /><label class="custom-control-label" for="Edit"><#= Code.raw(Code.languagePhrase("PermissionEdit")) #></label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowList" id="List" value="<#= Code.write(Code.Config.AllowList) #>" /><label class="custom-control-label" for="List"><#= Code.raw(Code.languagePhrase("PermissionList")) #></label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowLookup" id="Lookup" value="<#= Code.write(Code.Config.AllowLookup) #>" /><label class="custom-control-label" for="Lookup"><#= Code.raw(Code.languagePhrase("PermissionLookup")) #></label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowView" id="View" value="<#= Code.write(Code.Config.AllowView) #>" /><label class="custom-control-label" for="View"><#= Code.raw(Code.languagePhrase("PermissionView")) #></label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowSearch" id="Search" value="<#= Code.write(Code.Config.AllowSearch) #>" /><label class="custom-control-label" for="Search"><#= Code.raw(Code.languagePhrase("PermissionSearch")) #></label>
+            </div>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowImport" id="Import" value="<#= Code.write(Code.Config.AllowImport) #>"><label class="custom-control-label" for="Import"><#= Code.raw(Code.languagePhrase("PermissionImport")) #></label>
+            </div>
+<?php if (IsSysAdmin()) { ?>
+            <div class="custom-control custom-checkbox custom-control-inline">
+                <input type="checkbox" class="custom-control-input" name="x__AllowAdmin" id="Admin" value="<#= Code.write(Code.Config.AllowAdmin) #>"><label class="custom-control-label" for="Admin"><#= Code.raw(Code.languagePhrase("PermissionAdmin")) #></label>
+            </div>
+<?php } ?>
+        </td>
+    </tr>
+<?php } ?>
+<# } #>
+
+<#
+        }
+#>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (<#= isMobileOrModal #>) { ?>
+</div><!-- /page* -->
+<?php } else { ?>
+</table><!-- /table* -->
+<?php } ?>
+<# } else { #>
+</div><!-- /page* -->
+<# } #>
+
+<# if (useMultiPage && UseCustomMultiPageTemplate) { #>
+<#= GetCustomTemplatePage(pageidx) #>
+<# } #>
+
+<#
+        }
+        if (useMultiPage) {
+#>
+<# if (useAccordionForMultiPage) { #>
+            </div><!-- /multi-page accordion .card-body -->
+        </div><!-- /multi-page accordion .collapse -->
+    </div><!-- /multi-page accordion .card -->
+<# } else { #>
+        </div><!-- /multi-page .tab-pane -->
+<# } #>
+<#
+        }
+    } // Page
+#>
+
+<#
+    // Multi page
+    if (useMultiPage) {
+#>
+<# if (useAccordionForMultiPage) { #>
+</div><!-- /multi-page accordion -->
+<# } else { #>
+    </div><!-- /multi-page tabs .tab-content -->
+</div><!-- /multi-page tabs -->
+<# } #>
+</div><!-- /multi-page -->
+<#
+    }
+#>
+
+<#
+    // Generate detail key fields as hidden if not selected
+    for (let f of allFields) {
+        if (IsDetailKeyField(TABLE, f) && !currentFields.some(f1 => f1.FldName == f.FldName)) {
+            FIELD = f;
+#>
+    <#= FieldEditDetailKey() #>
+<#
+        }
+    } // AllField
+#>
+
+<# if (!useMultiPage && UseCustomTemplate) { #>
+<#= GetCustomTemplate() #>
+<# } #>
+
+<## Detail grid #>
+<#= include('shared/detail-grid.html') #>
+
+<## Captcha html #>
+<#= include('shared/captcha.html') #>
+
+<?php if (!<#= isModal #>) { ?>
+
+<div class="form-group row"><!-- buttons .form-group -->
+    <div class="<#= Code.write(pageOffsetColumnClass) #>"><!-- buttons offset -->
+
+<# if (addConfirm) { #>
+<?php if (!<#= isConfirm #>) { // Confirm page ?>
+<button class="<#= submitButtonClass #>" name="btn-action" id="btn-action" type="submit"<#= confirmButtonSubmit #>><#= Code.raw(Code.languagePhrase("AddBtn")) #></button>
+<button class="<#= cancelButtonClass #>" name="btn-cancel" id="btn-cancel" type="button" data-href="<#= Code.writePath(returnUrl) #>"><#= Code.raw(Code.languagePhrase("CancelBtn")) #></button>
+<?php } else { ?>
+<button class="<#= submitButtonClass #>" name="btn-action" id="btn-action" type="submit"><#= Code.raw(Code.languagePhrase("ConfirmBtn")) #></button>
+<button class="<#= cancelButtonClass #>" name="btn-cancel" id="btn-cancel" type="submit"<#= cancelButtonSubmit #>><#= Code.raw(Code.languagePhrase("CancelBtn")) #></button>
+<?php } ?>
+<# } else { #>
+<button class="<#= submitButtonClass #>" name="btn-action" id="btn-action" type="submit"><#= Code.raw(Code.languagePhrase("AddBtn")) #></button>
+<button class="<#= cancelButtonClass #>" name="btn-cancel" id="btn-cancel" type="button" data-href="<#= Code.writePath(returnUrl) #>"><#= Code.raw(Code.languagePhrase("CancelBtn")) #></button>
+<# } #>
+
+    </div><!-- /buttons offset -->
+</div><!-- /buttons .form-group -->
+
+<?php } ?>
+
+<# if (useTabularFormForDesktop) { #>
+<?php if (!<#= isMobileOrModal #>) { ?>
+</div><!-- /desktop -->
+<?php } ?>
+<# } #>
+
+</form>
+
+<# if (UseCustomTemplate) { #>
+<#= RenderCustomTemplate() #>
+<# } #>
+
+<## Page footer #>
+<#= include('shared/page-footer.html') #>
+
+<## User events #>
+<#= include('shared/user-events.html') #>
+
+<## Startup JavaScript #>
+<#= include('shared/startup.js') #>
+
+<## Page unload #>
+<#= include('shared/page-unload.php') #>

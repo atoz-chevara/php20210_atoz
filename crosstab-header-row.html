@@ -1,0 +1,54 @@
+	<!-- Table header -->
+    <tr class="ew-table-header">
+<?php if ($<#= pageObj #>->GroupColumnCount > 0) { ?>
+        <td class="ew-rpt-col-summary" colspan="<?= $<#= pageObj #>->GroupColumnCount ?>"><div><?= $<#= pageObj #>->renderSummaryCaptions() ?></div></td>
+<?php } ?>
+        <td class="ew-rpt-col-header" colspan="<?= @$<#= pageObj #>->ColumnSpan ?>">
+            <div class="ew-table-header-btn">
+                <span class="ew-table-header-caption"><?= $<#= columnFieldObject #>->caption() ?></span>
+            </div>
+        </td>
+    </tr>
+    <tr class="ew-table-header">
+<#
+    for (let grpFld of groupFields) {
+        FIELD = grpFld;
+        let fldName = grpFld.FldName, fldParm = grpFld.FldParm, fldVar = grpFld.FldVar, fldObj = Code.fldObj(),
+            headerAttrs = "",
+            renderSort = Code.getName(pageObj, "renderSort(" + Code.getName(fldObj) + ")");
+        if (fldName == columnDateFieldName) {
+            headerAttrs = FieldHeaderAttributes(columnField);
+        } else {
+            headerAttrs = FieldHeaderAttributes(grpFld);
+        }
+#>
+<?php if ($<#= fldObj #>->Visible) { ?>
+    <td data-field="<#= fldParm #>"><div<#= headerAttrs #>><?= <#= renderSort #> ?></div></td>
+<?php } ?>
+<#
+    } // End for
+
+    let fld = Code.getName(pageObj, "SummaryCurrentValues[$iy-1]"),
+        formatFld = ScriptViewFormat({ fld: columnField, parm: fld });
+    if (!IsEmpty(formatFld))
+        fld = formatFld;
+#>
+
+<!-- Dynamic columns begin -->
+<?php
+    $cntval = count($<#= pageObj #>->Columns);
+    for ($iy = 1; $iy < $cntval; $iy++) {
+        if ($<#= pageObj #>->Columns[$iy]->Visible) {
+            $<#= pageObj #>->SummaryCurrentValues[$iy-1] = $<#= pageObj #>->Columns[$iy]->Caption;
+            $<#= pageObj #>->SummaryViewValues[$iy-1] = <#= fld #>;
+?>
+        <td class="ew-table-header"<?= $<#= columnFieldObject #>->cellAttributes() ?>><div<?= $<#= columnFieldObject #>->viewAttributes() ?>><?= $<#= pageObj #>->SummaryViewValues[$iy-1]; ?></div></td>
+<?php
+        }
+    }
+?>
+<!-- Dynamic columns end -->
+<# if (TABLE.TblRowSum) { #>
+        <td class="ew-table-header"<?= $<#= columnFieldObject #>->cellAttributes() ?>><div<?= $<#= columnFieldObject #>->viewAttributes() ?>><?= $<#= pageObj #>->renderSummaryCaptions() ?></div></td>
+<# } #>
+    </tr>

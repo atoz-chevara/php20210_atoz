@@ -1,0 +1,44 @@
+<#
+    let lvl = groupIndex + 1,
+        grpFld = groupFields[groupIndex],
+        fldName = grpFld.FldName,
+        fldVar = grpFld.FldVar,
+        fldParm = grpFld.FldParm,
+        fldObj = Code.fldObj(grpFld),
+        classId = "ew-summary-caption d-inline-block " + tblVar + "_" + fldParm,
+        renderSort = Code.getName(pageObj, "renderSort(" + Code.getName(fldObj) + ")");
+    FIELD = grpFld;
+#>
+<?php if ($<#= fldObj #>->Visible && $<#= fldObj #>->ShowGroupHeaderAsRow) { ?>
+<?php
+        // Render header row
+<# if (groupIndex > 0) { #>
+        $<#= fldObj #>->setDbValue($<#= fldParm #>); // Set current value for <#= fldName #>
+<# } #>
+        $<#= pageObj #>->resetAttributes();
+        $<#= pageObj #>->RowType = ROWTYPE_TOTAL;
+        $<#= pageObj #>->RowTotalType = ROWTOTAL_GROUP;
+        $<#= pageObj #>->RowTotalSubType = ROWTOTAL_HEADER;
+        $<#= pageObj #>->RowGroupLevel = <#= lvl #>;
+        $<#= pageObj #>->renderRow();
+?>
+    <tr<?= $<#= pageObj #>->rowAttributes(); ?>>
+<#
+        for (let j = 0; j < lvl; j++) {
+            let gf = groupFields[j],
+                grpFldObj = Code.fldObj(gf), // global
+                grpFldParm = gf.FldParm,
+                icon = (j == lvl - 1) ? `<span class="ew-group-toggle icon-collapse"></span>` : "";
+#>
+<?php if ($<#= grpFldObj #>->Visible) { ?>
+        <td data-field="<#= grpFldParm #>"<?= $<#= grpFldObj #>->cellAttributes(); ?>><#= icon #></td>
+<?php } ?>
+<#
+        } // End for j
+#>
+        <td data-field="<#= fldParm #>" colspan="<?= ($Page->GroupColumnCount + $Page->DetailColumnCount - <#= lvl #>) ?>"<?= $<#= fldObj #>->cellAttributes() ?>>
+        <span class="<#= classId #>"><?= <#= renderSort #> ?></span><?= $Language->phrase("SummaryColon") ?><#= FieldGroupView() #>
+        <span class="ew-summary-count">(<span class="ew-aggregate-caption"><?= $Language->phrase("RptCnt") ?></span><?= $Language->phrase("AggregateEqual") ?><span class="ew-aggregate-value"><?= FormatNumber($<#= fldObj #>->Count, 0); ?></span>)</span>
+        </td>
+    </tr>
+<?php } ?>

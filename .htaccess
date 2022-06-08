@@ -1,0 +1,27 @@
+<#
+let rewriteBase = (PROJ.RewriteBase || "").trim(),
+    quoted = rewriteBase.startsWith('"') && rewriteBase.endsWith('"');
+if (quoted)
+    rewriteBase = RemoveQuotes(rewriteBase);
+let apiRewriteBase = IncludeTrailingSlash(rewriteBase) + FolderPath("_api", rewriteBase.endsWith("/"));
+if (quoted) {
+    rewriteBase = DoubleQuote(rewriteBase);
+    apiRewriteBase = DoubleQuote(apiRewriteBase);
+}
+#>
+RewriteEngine On
+<# if (rewriteBase) { #>
+    <# if (CONTROL.CtrlID == "htaccess") { #>
+RewriteBase <#= rewriteBase #>
+    <# } else if (CONTROL.CtrlID == "apihtaccess") { #>
+RewriteBase <#= apiRewriteBase #>
+    <# } #>
+<# } #>
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+<# if (CONTROL.CtrlID == "apihtaccess" && PROJ.ApiCustomHeaders) { #>
+Header set Access-Control-Allow-Origin "<#= PROJ.AccessControlAllowOrigin || "*" #>"
+Header set Access-Control-Allow-Headers "<#= AccessControlAllowHeaders() #>"
+Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+<# } #>

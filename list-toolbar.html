@@ -1,0 +1,30 @@
+<# if (ctrlId == "list") { #>
+
+<#= exportStart #>
+<div class="btn-toolbar ew-toolbar">
+
+<?php if (<#= totalRecs #> > 0 && $<#= pageObj #>->ExportOptions->visible()) { ?>
+<?php $<#= pageObj #>->ExportOptions->render("body") ?>
+<?php } ?>
+
+<?php if ($<#= pageObj #>->ImportOptions->visible()) { ?>
+<?php $<#= pageObj #>->ImportOptions->render("body") ?>
+<?php } ?>
+
+<# if (useBasicSearch || useExtendedBasicSearch || useAdvancedSearch) { #>
+
+<?php if ($<#= pageObj #>->SearchOptions->visible()) { ?>
+<?php $<#= pageObj #>->SearchOptions->render("body") ?>
+<?php } ?>
+
+<?php if ($<#= pageObj #>->FilterOptions->visible()) { ?>
+<?php $<#= pageObj #>->FilterOptions->render("body") ?>
+<?php } ?>
+
+<# } #>
+
+<div class="clearfix"></div>
+</div>
+<#= exportEnd #>
+
+<# } #>

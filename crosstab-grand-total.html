@@ -1,0 +1,29 @@
+<?php
+    $<#= pageObj #>->resetAttributes();
+    $<#= pageObj #>->RowType = ROWTYPE_TOTAL;
+    $<#= pageObj #>->RowTotalType = ROWTOTAL_GRAND;
+    $<#= pageObj #>->RowAttrs["class"] = "ew-rpt-grand-summary";
+    $<#= pageObj #>->renderRow();
+?>
+    <!-- Grand Total -->
+    <tr<?= $<#= pageObj #>->rowAttributes(); ?>>
+<?php if ($<#= pageObj #>->GroupColumnCount > 0) { ?>
+    <td colspan="<?= $<#= pageObj #>->GroupColumnCount ?>"><?= $<#= pageObj #>->renderSummaryCaptions("grand") ?></td>
+<?php } ?>
+
+<!-- Dynamic columns begin -->
+<?php
+    $cntcol = count($<#= pageObj #>->SummaryViewValues);
+    for ($iy = 1; $iy <= $cntcol; $iy++) {
+        $colShow = ($iy <= $<#= pageObj #>->ColumnCount) ? $<#= pageObj #>->Columns[$iy]->Visible : true;
+        $colDesc = ($iy <= $<#= pageObj #>->ColumnCount) ? $<#= pageObj #>->Columns[$iy]->Caption : $Language->phrase("Summary");
+        if ($colShow) {
+?>
+        <!-- <?= $colDesc; ?> -->
+        <td<?= $<#= pageObj #>->summaryCellAttributes($iy-1) ?>><?= $<#= pageObj #>->renderSummaryFields($iy-1) ?></td>
+<?php
+        }
+    }
+?>
+<!-- Dynamic columns end -->
+    </tr>

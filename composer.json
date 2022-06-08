@@ -1,0 +1,98 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+<#
+	let resolveFolder = id => FolderPath(id, true),
+		srcFolder = resolveFolder("_src"),
+		modelsFolder = resolveFolder("_models"),
+		controllersFolder = resolveFolder("_controllers");
+
+	let config = {
+		"name": "hkvstore/phpmaker",
+		"version": "2021",
+		"type": "project",
+		"homepage": "https://phpmaker.dev/",
+		"license": "Commercial",
+		"authors": [{
+			"name": "e.World Technology Limited",
+			"email": "sales@hkvstore.com"
+		}],
+		// "repositories": [
+		// 	{
+		// 		"type": "path",
+		// 		"url": "D:/Source/packages/dompdf",
+		// 		"options": {
+		// 			"symlink": false
+		// 		}
+		// 	}
+		// ],
+		"require": {
+			"php": ">=7.2.0",
+			"slim/slim": "^4.5.0",
+			"slim/csrf": IsPhp73() ? "^1.2.1" : "1.1.0",
+			"slim/http": "^1.0.0",
+			"slim/http-cache": "^1.0.0",
+			"slim/flash": "^0.4.0",
+			"slim/php-view": IsPhp73() ? "^3.1.0" : "3.0.0",
+			"nyholm/psr7": "^1.3.0",
+			"nyholm/psr7-server": "^1.0.0",
+			"php-di/php-di": "^6.2.1",
+			"doctrine/dbal": IsPhp73() ? "^2.12.1" : "2.10.4",
+			"monolog/monolog": "^2.1.0",
+			"firebase/php-jwt": "^5.2.0",
+			"phpmailer/phpmailer": "^6.1.7",
+			"ezyang/htmlpurifier": "^4.13.0",
+			"mobiledetect/mobiledetectlib": "^2.8.34",
+			"soundasleep/html2text": "^1.1.0",
+			"defuse/php-encryption": "~2.2.1",
+			"hkvstore/phpthumb": "^2.1.4",
+			"athari/yalinqo": "^2.4.2",
+			"dflydev/dot-access-data": "^3.0.0",
+			"delight-im/cookie": "^3.4.0",
+			"selective/samesite-cookie": "~0.3.0"
+		},
+		"autoload": {
+			"psr-4": {
+				[ProjectNamespace + "\\"]: [srcFolder, modelsFolder, controllersFolder]
+			},
+			"classmap": [srcFolder + "UploadHandler.php", srcFolder + "PasswordHash.php"]
+		}
+	}
+
+	if (useOAuth2)
+		config.require["hybridauth/hybridauth"] = "^3.4.0";
+
+	let ext = GetExtensionObject("reCAPTCHA");
+	if (ext && ext.Enabled)
+		config.require["google/recaptcha"] = "^1.2.4";
+
+	ext = GetExtensionObject("PHPWord");
+	if (ext && ext.Enabled)
+		config.require["phpoffice/phpword"] = "^0.17.0";
+
+	ext = GetExtensionObject("PhpSpreadsheet");
+	if (ext && ext.Enabled || IsImport())
+		config.require["phpoffice/phpspreadsheet"] = "^1.14.1";
+
+	ext = GetExtensionObject("DOMPDF");
+	if (ext && ext.Enabled) {
+		config.require["hkvstore/dompdf"] = "~1.0.2";
+		if (typeof UseTCPDF === "function" && UseTCPDF())
+			config.require["tecnickcom/tcpdf"] = "^6.4.1";
+	}
+
+	ext = GetExtensionObject("FileManager");
+	if (ext && ext.Enabled)
+		config.require["hkvstore/richfilemanager"] = "^2.8.0";
+
+	if (typeof phpbarcode != "undefined") {
+		config.require["picqer/php-barcode-generator"] = "^2.0.1";
+		config.require["tecnickcom/tcpdf"] = "^6.4.1";
+	}
+
+	if (PROJ.Require) {
+		let packages = ParseJson(PROJ.Require);
+		if (IsObject(packages))
+			Object.assign(config.require, packages);
+	}
+#>
+<#= JSON.stringify(config, null, "\t") #>

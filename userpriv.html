@@ -1,0 +1,94 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+
+<## Common table config #>
+<#= include('shared/config-table.php') #>
+
+<## Page load #>
+<#= include('shared/page-load.php') #>
+
+<## Local JavaScript #>
+<#= include('shared/local.js') #>
+
+<## Client JavaScript #>
+<#= include('shared/client.js') #>
+
+<## Show message #>
+<#= include('shared/show-message.html') #>
+
+<#
+    let userLevelIdField = GetFieldObject(TABLE, DB.UserLevelIdFld),
+        userLevelIdFldVar = userLevelIdField.FldVar,
+        userLevelIdFldParm = userLevelIdField.FldParm,
+        userLevelIdFldObj = Code.fldObj(userLevelIdField),
+        userLevelIdValue = Code.getName(userLevelIdFldObj, Code.Field.CurrentValue),
+        userLevelName = Code.getName(Code.Security, Code.GetUserLevelName + "(" + Code.castInt(userLevelIdValue) + ")"),
+        disabled = Code.getName(pageObj, "Disabled"),
+        privileges = Code.getName(pageObj, "Privileges");
+
+    let _getSize = function (v) {
+        if (IsNumber(v) && v > 0) {
+            return v + "px";
+        }
+        v = String(v).trim();
+        if (v.match(/^\d+$/) && Number(v) > 0) { // Number
+            return v + "px";
+        } else if (v.match(/^\d+(px|%)$/)) { // Number + unit
+            return v;
+        }
+        return "";
+    };
+
+    let jsFolder = FolderPath("_js"),
+        useFixedHeaderTable = false,
+        tableHeight = "",
+        extName = "FixedHeaderTable",
+        ext = GetExtensionObject(extName);
+
+    if (ext && ext.Enabled) {
+        useFixedHeaderTable = ext.PROJ.EnableForUserPriv;
+        tableHeight = _getSize(ext.PROJ.UserPrivTableHeight);
+    }
+#>
+
+<form name="<#= formName #>" id="<#= formName #>" class="form-inline ew-form ew-user-priv-form" action="<#= Code.write(Code.CurrentPageUrl(false)) #>" method="post"<#= formNoValidate #>>
+
+<## Token tag #>
+<#= include('shared/token-tag.html') #>
+
+<input type="hidden" name="t" value="<#= tblVar #>">
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="<#= userLevelIdFldVar #>" id="<#= userLevelIdFldVar #>" value="<#= Code.write(userLevelIdValue) #>">
+<div class="ew-desktop">
+<div class="card ew-card ew-user-priv">
+<div class="card-header">
+    <h3 class="card-title"><#= Code.raw(Code.languagePhrase("UserLevel")) #><#= Code.raw(userLevelName) #> (<#= Code.write(userLevelIdValue) #>)</h3>
+    <div class="card-tools">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+            </div>
+            <input type="search" name="table-name" id="table-name" class="form-control form-control-sm" placeholder="<#= Code.write(Code.htmlEncode(Code.languagePhrase("Search"))) #>">
+        </div>
+    </div>
+</div>
+<div class="<#= Code.write("ResponsiveTableClass()") #>card-body ew-card-body p-0"></div>
+</div>
+<div class="ew-desktop-button">
+<button class="<#= submitButtonClass #>" name="btn-submit" id="btn-submit" type="submit"<#= Code.write(disabled) #>><#= Code.raw(Code.languagePhrase("Update")) #></button>
+<button class="<#= cancelButtonClass #>" name="btn-cancel" id="btn-cancel" type="button" data-href="<#= Code.writePath(returnUrl) #>"><#= Code.raw(Code.languagePhrase("CancelBtn")) #></button>
+</div>
+</div>
+</form>
+<script>
+var useFixedHeaderTable = <#= JsBool(useFixedHeaderTable) #>,
+    tableHeight = "<#= tableHeight #>",
+    priv = <#= Code.raw(Code.toJson(privileges)) #>;
+</script>
+<script src="<?= BasePath() ?>/<#= jsFolder #>/ewuserpriv.min.js"></script>
+
+<## Startup JavaScript #>
+<#= include('shared/startup.js') #>
+
+<## Page unload #>
+<#= include('shared/page-unload.php') #>

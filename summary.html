@@ -1,0 +1,140 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+
+<## Common table config #>
+<#= include('shared/config-table.php') #>
+
+<## Common report config #>
+<#= include('shared/config-report.php') #>
+
+<## Page load #>
+<#= include('shared/page-load.php') #>
+
+<#= reportExportStart #>
+<## Local JavaScript #>
+<#= include('shared/local.js') #>
+
+<## Client JavaScript #>
+<#= include('shared/client.js') #>
+<#= reportExportEnd #>
+
+<a id="top"></a>
+
+<#= showReportContainerStart #>
+<!-- Content Container -->
+<div id="ew-report" class="ew-report <#= reportContainerClass #>">
+<#= showReportContainerEnd #>
+
+<## Report show filter list #>
+<#= include('shared/report-show-filter-list.html') #>
+
+<## Report toolbar #>
+<#= include('shared/report-toolbar.html') #>
+
+<## Page header #>
+<#= include('shared/page-header.html') #>
+
+<## Show message #>
+<#= include('shared/show-message.html') #>
+
+<## Top charts #>
+<#= include('shared/chart-top.html') #>
+
+<#= showReportContainerStart #>
+<div class="row">
+<#= showReportContainerEnd #>
+
+<## Left charts #>
+<#= include('shared/chart-left.html') #>
+
+<## Report #>
+
+<#= showReportContainerStart #>
+<!-- Center Container -->
+<div id="ew-center" class="<#= Code.write(reportCenterContentClass) #>">
+<#= showReportContainerEnd #>
+
+<## Report drill down list #>
+<#= include('shared/report-drilldown-list.html') #>
+
+<!-- Summary report (begin) -->
+
+<#= skipPdfExportStart #>
+<div id="report_summary">
+<#= skipPdfExportEnd #>
+
+<# if (showReport || showCharts) { #>
+
+<#= reportSearchStart #>
+<## Search panel #>
+<#= include('shared/search-panel.html') #>
+<#= reportSearchEnd #>
+
+<# } #>
+
+<# if (showReport) { #>
+
+<# if (groupFields.length == 0) { #>
+<## Simple report #>
+<#= include('./simple-report.html') #>
+<# } else { #>
+    <# if (showSummaryView) { #>
+<## Compact view report #>
+<#= include('./compact-report.html') #>
+    <# } else { #>
+<## Summary report #>
+<#= include('./summary-report.html') #>
+    <# } #>
+<# } #>
+
+<# } // End Show Report #>
+
+<#= skipPdfExportStart #>
+</div>
+<!-- /#report-summary -->
+<#= skipPdfExportEnd #>
+
+<# if (showReport && UseCustomTemplate) { #>
+<## Summary report custom template #>
+<?php if (<#= isExport #> || $<#= pageObj #>->UseCustomTemplate) { ?>
+<#= GetCustomTemplate() #>
+<?php } ?>
+<# } #>
+
+<!-- Summary report (end) -->
+
+<#= showReportContainerStart #>
+</div>
+<!-- /#ew-center -->
+<#= showReportContainerEnd #>
+
+<## Right charts #>
+<#= include('shared/chart-right.html') #>
+
+<#= showReportContainerStart #>
+</div>
+<!-- /.row -->
+<#= showReportContainerEnd #>
+
+<## Bottom charts #>
+<#= include('shared/chart-bottom.html') #>
+
+<#= showReportContainerStart #>
+</div>
+<!-- /.ew-report -->
+<#= showReportContainerEnd #>
+
+<# if (UseCustomTemplate) { #>
+<#= RenderCustomTemplate() #>
+<# } #>
+
+<## Page footer #>
+<#= include('shared/page-footer.html') #>
+
+<#= reportExportStart #>
+<## Startup JavaScript #>
+<#= include('shared/startup.js') #>
+<#= reportExportEnd #>
+
+<## Page unload #>
+<#= include('shared/page-unload.php') #>

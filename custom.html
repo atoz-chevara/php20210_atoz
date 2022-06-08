@@ -1,0 +1,16 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+<#
+    let customPage = TABLE.TblName,
+        includeFiles = TABLE.IncludeFiles && customPage.toLowerCase().endsWith(".php");
+#>
+<# if (includeFiles) { #>
+<## Page load #>
+<#= include('shared/page-load.php') #>
+<# } #>
+<#= GetCustomTemplate() #>
+<# if (includeFiles) { #>
+<?= GetDebugMessage() ?>
+<## Page unload #>
+<#= include('shared/page-unload.php') #>
+<# } #>

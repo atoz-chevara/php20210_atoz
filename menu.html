@@ -1,0 +1,44 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+<#
+    let languageFolder = FolderPath("_language", true);
+#>
+<?php
+
+namespace <#= ProjectNamespace #>;
+
+// Menu Language
+if ($Language && function_exists(PROJECT_NAMESPACE . "Config") && $Language->LanguageFolder == Config("LANGUAGE_FOLDER")) {
+    $MenuRelativePath = "";
+    $MenuLanguage = &$Language;
+} else { // Compat reports
+    $LANGUAGE_FOLDER = "../<#= languageFolder #>";
+    $MenuRelativePath = "../";
+    $MenuLanguage = Container("language");
+}
+
+// Navbar menu
+$topMenu = new Menu("navbar", true, true);
+<#
+    for (let menuItem of topMenuItems) {
+        let url = menuItem.url;
+        url = url ? `$MenuRelativePath . ${DoubleQuote(url)}` : '""';
+#>
+$topMenu->addMenuItem(<#= menuItem.id #>, "<#= menuItem.name #>", <#= menuItem.phrase #>, <#= url #>, <#= menuItem.parentId #>, <#= DoubleQuote(menuItem.source) #>, <#= menuItem.security #>, <#= Code.bool(menuItem.group) #>, <#= Code.bool(menuItem.isCustomUrl) #>, "<#= menuItem.icon #>", "", true);
+<#
+    }
+#>
+echo $topMenu->toScript();
+
+// Sidebar menu
+$sideMenu = new Menu("menu", true, false);
+<#
+    for (let menuItem of allMenuItems) {
+        let url = menuItem.url;
+        url = url ? `$MenuRelativePath . ${DoubleQuote(url)}` : '""';
+#>
+$sideMenu->addMenuItem(<#= menuItem.id #>, "<#= menuItem.name #>", <#= menuItem.phrase #>, <#= url #>, <#= menuItem.parentId #>, <#= DoubleQuote(menuItem.source) #>, <#= menuItem.security #>, <#= Code.bool(menuItem.group) #>, <#= Code.bool(menuItem.isCustomUrl) #>, "<#= menuItem.icon #>", "", <#= Code.bool(menuItem.isNavbarItem) #>);
+<#
+    }
+#>
+echo $sideMenu->toScript();

@@ -1,0 +1,233 @@
+<## Common config #>
+<#= include('shared/config-common.php') #>
+
+<## Namespace #>
+<#= include('shared/namespace.php') #>
+
+<## Common table config #>
+<# if (hasUserTable) { #>
+<#= include('shared/config-table.php') #>
+<# } #>
+
+<## Page load #>
+<#= include('shared/page-load.php') #>
+
+<## Client JavaScript #>
+<#= include('shared/client.js') #>
+
+<#
+    // Set login option
+    let loginOptions = (PROJ.LoginOption || "").split(",").filter(option => ["AUTO"].includes(option.trim()))
+        .slice()
+        .map(option => option.trim());
+
+    let userName = Code.raw(Code.getName(pageObj, "Username", "FieldVar")),
+        userNameValue = Code.getName(pageObj, "Username", "CurrentValue"),
+        userNameAtt = Code.getName(pageObj, "Username", "editAttributes()"),
+        userNameMsg = Code.getName(pageObj, "Username", Code.Field.ErrorMessage),
+        password = Code.raw(Code.getName(pageObj, "Password", "FieldVar")),
+        passwordAtt = Code.getName(pageObj, "Password", "editAttributes()"),
+        passwordMsg = Code.getName(pageObj, "Password", Code.Field.ErrorMessage),
+        loginType = Code.raw(Code.getName(pageObj, "LoginType", "FieldVar")),
+        loginTypeValue = Code.getName(pageObj, "LoginType", "CurrentValue");
+#>
+
+<style>
+body {
+  background-image: url('images/bg.jpg');
+  background-repeat: no-repeat;
+  background-attachment: fixed;  
+  background-size: cover;
+}
+
+.ew-login-box {
+    margin-top: 182px;
+    margin-bottom: 220px;
+    background-color:#1E74FF;
+    border: 0px solid;
+    border-radius: 10px;
+}
+
+.login-logo-fix {
+    font-size: 6.1rem;
+    font-weight: 300;
+/*  margin-top: 1px; */
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.login-card-fix {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+}
+
+.card-body-fix {
+    flex: 1 1 auto;
+    min-height: 1px;
+    padding: 2.25rem;
+}
+
+.copyright {
+    font-size: 80%;
+    color: white;
+    margin-top: 20px;
+    padding-bottom: 20px;
+    text-align: center;
+}
+</style>
+
+<script>
+var <#= formName #>;
+loadjs.ready("head", function() {
+    var $ = jQuery;
+    <#= formName #> = new ew.Form("<#= formName #>");
+
+    // Add fields
+    <#= formName #>.addFields([
+        ["username", ew.Validators.required(ew.language.phrase("UserName")), <#= Code.write(Code.jsBool(Code.getName(pageObj, "Username", "IsInvalid"))) #>],
+        ["password", ew.Validators.required(ew.language.phrase("Password")), <#= Code.write(Code.jsBool(Code.getName(pageObj, "Password", "IsInvalid"))) #>]
+    ]);
+
+    // Captcha
+    <?= Captcha()->getScript("<#= formName #>") ?>
+
+    // Set invalid fields
+    $(function() {
+        <#= formName #>.setInvalid();
+    });
+
+    // Validate
+    <#= formName #>.validate = function() {
+        if (!this.validateRequired)
+            return true; // Ignore validation
+
+        var $ = jQuery,
+            fobj = this.getForm();
+
+
+        // Validate fields
+        if (!this.validateFields())
+            return false;
+
+    <# if (ClientScriptExist("Other", "Form_CustomValidate")) { #>
+        // Call Form_CustomValidate event
+        if (!this.customValidate(fobj)) {
+            this.focus();
+            return false;
+        }
+    <# } #>
+        return true;
+    }
+
+    <# if (ClientScriptExist("Other", "Form_CustomValidate")) { #>
+    // Form_CustomValidate
+    <#= formName #>.customValidate = <#= GetClientScript("Other", "Form_CustomValidate").replace(/(\r\n|\r|\n)/g, "$1    ") #>
+    <# } #>
+
+    // Use JavaScript validation
+    <#= formName #>.validateRequired = <#= Code.write(Code.jsonEncode(Code.Config.ClientValidate)) #>;
+
+    loadjs.done("<#= formName #>");
+});
+</script>
+
+<## Page header #>
+<#= include('shared/page-header.html') #>
+
+<## Show message #>
+<#= include('shared/show-message.html') #>
+
+<body>
+<form name="<#= formName #>" id="<#= formName #>" class="ew-form ew-login-form" action="<#= Code.write(Code.CurrentPageUrl(false)) #>" method="post"<#= formNoValidate #>>
+
+<## Token tag #>
+<#= include('shared/token-tag.html') #>
+
+<input type="hidden" name="modal" value="<#= Code.write(Code.castInt(isModal)) #>">
+
+<div class="ew-login-box" style="margin-top: 220px;">
+<div class="login-logo-fix"><img src="<?= GetUrl("images/logo_text.png") ?>" alt="" class="brand-image ew-brand-image"></div>
+<div class="login-card-fix">
+    <div class="card-body-fix">
+    <p class="login-box-msg"><#= Code.raw(Code.languagePhrase("LoginMsg")) #></p>
+    <div class="form-group row">
+        <input type="text" name="<#= userName #>" id="<#= userName #>" autocomplete="username" value="<#= Code.write(Code.htmlEncode(userNameValue)) #>" placeholder="<#= Code.write(Code.htmlEncode(Code.languagePhrase("Username"))) #>"<#= Code.raw(userNameAtt) #>>
+        <#= FieldEditErrorMessage({ msg: userNameMsg }) #>
+    </div>
+    <div class="form-group row">
+        <div class="input-group"><input type="password" name="<#= password #>" id="<#= password #>" autocomplete="current-password" placeholder="<#= Code.write(Code.htmlEncode(Code.languagePhrase("Password"))) #>"<#= Code.raw(passwordAtt) #>><div class="input-group-append"><#= TogglePasswordButton(true) #></div></div>
+        <#= FieldEditErrorMessage({ msg: passwordMsg }) #>
+    </div>
+
+<# if (loginOptions.includes("AUTO")) { #>
+    <div class="form-group row">
+        <div class="custom-control custom-checkbox">
+            <input type="checkbox" name="<#= loginType #>" id="<#= loginType #>" class="custom-control-input" value="a"<?php if (<#= loginTypeValue #> == "a") { ?> checked<?php } ?>>
+            <label class="custom-control-label" for="<#= loginType #>"><#= Code.raw(Code.languagePhrase("RememberMe")) #></label>
+        </div>
+    </div>
+<# } #>
+
+<## Captcha html #>
+<#= include('shared/captcha.html') #>
+
+<?php if (!<#= isModal #>) { ?>
+    <button class="<#= submitButtonClass #>" name="btn-submit" id="btn-submit" type="submit"><#= Code.raw(Code.languagePhrase("Login")) #></button>
+<?php } ?>
+
+<?php
+// OAuth login
+$providers = Config("AUTH_CONFIG.providers");
+$cntProviders = 0;
+foreach ($providers as $id => $provider) {
+    if ($provider["enabled"]) {
+        $cntProviders++;
+    }
+}
+if ($cntProviders > 0) {
+?>
+    <div class="social-auth-links text-center mt-3">
+        <p><#= Code.raw(Code.languagePhrase("LoginOr")) #></p>
+<?php
+        foreach ($providers as $id => $provider) {
+            if ($provider["enabled"]) {
+?>
+            <a href="<#= Code.write(Code.CurrentPageUrl(false)) #>?provider=<?= $id ?>" class="btn btn-block btn-<?= strtolower($provider["color"]) ?>"><i class="fab fa-<?= strtolower($id) ?> mr-2"></i><?= $Language->phrase("Login" . $id) ?></a>
+<?php
+            }
+        }
+?>
+    </div>
+<?php
+}
+?>
+
+<# if (hasUserTable) { #>
+<div class="social-auth-links text-center mt-3">
+    <# if (PROJ.SecForgetPwdPage) { #>
+    <a class="card-link mr-2" href="#" onclick="<?= $LoginStatus["resetPasswordUrl"] ?>"><?= $Language->phrase("ResetPassword") ?></a>
+    <# } #>
+    <# if (PROJ.SecRegisterPage) { #>
+    <a class="card-link mr-2" href="#" onclick="<?= $LoginStatus["registerUrl"] ?>"><?= $Language->phrase("Register") ?></a>
+    <# } #>
+</div>
+<# } #>
+
+</div>
+</div>
+	<div align="center" class="copyright"><#= Code.raw(Code.languageProjectPhrase("FooterText")) #></div>
+</div>
+</form>
+<## Page footer #>
+<#= include('shared/page-footer.html') #>
+
+<## Startup JavaScript #>
+<#= include('shared/startup.js') #>
+
+<## Page unload #>
+<#= include('shared/page-unload.php') #>

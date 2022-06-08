@@ -1,0 +1,27 @@
+<# if (topCharts.length > 0) { #>
+
+<#= showReportContainerStart #>
+<!-- Top Container -->
+<div class="row">
+    <div id="ew-top" class="<#= Code.write(reportTopContentClass) #>">
+<#= showReportContainerEnd #>
+
+<#
+    // Generate charts (on top)
+    topCharts.forEach((c, i) => {
+        CHART = c;
+        chartIndex = i;
+#>
+<## render chart #>
+<#= include('./chart-render.html') #>
+<#
+    }); // End for, Chart on top
+#>
+
+<#= showReportContainerStart #>
+    </div>
+</div>
+<!-- /#ew-top -->
+<#= showReportContainerEnd #>
+
+<# } #>

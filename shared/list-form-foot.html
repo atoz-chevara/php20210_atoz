@@ -1,0 +1,79 @@
+<#
+    let multiSelectKey = Code.getName(pageObj, Code.MultiSelectKey),
+        updateConflict = Code.getName(pageObj, Code.UpdateConflict);
+
+    if (inlineAdd || inlineCopy) {
+#>
+<?php if (<#= isAdd #> || <#= isCopy #>) { ?>
+<input type="hidden" name="<#= Code.write(formKeyCountName) #>" id="<#= Code.write(formKeyCountName) #>" value="<#= Code.write(keyCount) #>">
+<input type="hidden" name="<#= Code.write(Code.getName(pageObj, Code.OldKeyName)) #>" value="<#= Code.raw(Code.getName(pageObj, Code.OldKey)) #>">
+<?php } ?>
+<#
+    }
+#>
+<#
+    if (gridAdd) {
+#>
+<# if (ctrlId == "grid") { #>
+<?php if (<#= currentMode #> == "add" || <#= currentMode #> == "copy") { ?>
+<# } else { #>
+<?php if (<#= isGridAdd #>) { ?>
+<input type="hidden" name="action" id="action" value="gridinsert">
+<# } #>
+<input type="hidden" name="<#= Code.write(formKeyCountName) #>" id="<#= Code.write(formKeyCountName) #>" value="<#= Code.write(keyCount) #>">
+<#= Code.raw(multiSelectKey) #>
+<?php } ?>
+<#
+    }
+#>
+<#
+    if (inlineEdit) {
+#>
+<?php if (<#= isEdit #>) { ?>
+<input type="hidden" name="<#= Code.write(formKeyCountName) #>" id="<#= Code.write(formKeyCountName) #>" value="<#= Code.write(keyCount) #>">
+<input type="hidden" name="<#= Code.write(Code.getName(pageObj, Code.OldKeyName)) #>" value="<#= Code.raw(Code.getName(pageObj, Code.OldKey)) #>">
+<?php } ?>
+<#
+    }
+#>
+<#
+    if (gridEdit) {
+#>
+<# if (ctrlId == "grid") { #>
+<?php if (<#= currentMode #> == "edit") { ?>
+<# } else { #>
+<?php if (<#= isGridEdit #>) { ?>
+    <# if (checkConcurrentUpdate) { #>
+<?php if (<#= updateConflict #> == "U") { // Record already updated by other user ?>
+<input type="hidden" name="action" id="action" value="gridoverwrite">
+<?php } else { ?>
+    <# } #>
+<input type="hidden" name="action" id="action" value="gridupdate">
+    <# if (checkConcurrentUpdate) { #>
+<?php } ?>
+    <# } #>
+<# } #>
+<input type="hidden" name="<#= Code.write(formKeyCountName) #>" id="<#= Code.write(formKeyCountName) #>" value="<#= Code.write(keyCount) #>">
+<#= Code.raw(multiSelectKey) #>
+<?php } ?>
+<#
+    }
+#>
+
+<# if (ctrlId == "grid") { #>
+<?php if (<#= currentMode #> == "") { ?>
+<# } else { #>
+<?php if (!<#= currentAction #>) { ?>
+<# } #>
+<input type="hidden" name="action" id="action" value="">
+<?php } ?>
+
+<# if (ctrlId == "grid") { #>
+<input type="hidden" name="detailpage" value="<#= formName #>">
+<# } #>
+
+<# if (ctrlId == "list") { #>
+</form><!-- /.ew-list-form -->
+<# } else { #>
+</div><!-- /.ew-list-form -->
+<# } #>

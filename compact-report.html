@@ -1,0 +1,71 @@
+<## Load groups start #>
+<#= include('shared/report-load-groups-script-start.php') #>
+
+<#
+    let reportPageBreakContent = Code.raw(pageBreakContent);
+    if (UseCustomTemplate)
+        reportPageBreakContent = `<template id="tpb${Code.write(grpCount + " - 1")}_${tblVar}">${reportPageBreakContent}</template>`;
+#>
+<?php
+    // Show header
+    if (<#= showHeader #>) {
+?>
+
+<?php if (<#= grpCount #> > 1) { ?>
+</tbody>
+<## Report footer #>
+<#= include('shared/report-foot.html') #>
+<#= reportPageBreakContent #>
+<?php } ?>
+
+<## Report header #>
+<#= include('shared/report-head.html') #>
+
+<thead>
+<## Report header row #>
+<#= include('./compact-header-row.html') #>
+</thead>
+<tbody>
+
+<?php
+        if (<#= totalGrps #> == 0) {
+            break; // Show header only
+        }
+        <#= showHeader #> = false;
+    } // End show header
+?>
+
+<## Load details start #>
+<#= include('shared/report-load-details-script-start.php') #>
+
+<## Load details end #>
+<#= include('shared/report-load-details-script-end.php') #>
+
+<## Load groups end #>
+<#= include('shared/report-load-groups-script-end.php') #>
+
+<?php if (<#= totalGrps #> > 0) { ?>
+
+</tbody>
+<tfoot>
+
+<# if (TABLE.TblRptShowPageTotal) { #>
+
+<## Summary page total #>
+<#= include('./compact-page-total.html') #>
+
+<# } // End show page total #>
+
+<# if (TABLE.TblRptShowGrandTotal) { #>
+
+<## Summary grand total #>
+<#= include('./compact-grand-total.html') #>
+
+<# } // End show grand total #>
+
+</tfoot>
+
+<## Report footer #>
+<#= include('shared/report-foot.html') #>
+
+<?php } ?>

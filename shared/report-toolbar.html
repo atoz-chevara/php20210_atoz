@@ -1,0 +1,10 @@
+<div class="btn-toolbar ew-toolbar">
+<?php
+if (!$<#= pageObj #>->DrillDownInPanel) {
+    $<#= pageObj #>->ExportOptions->render("body");
+    $<#= pageObj #>->SearchOptions->render("body");
+    $<#= pageObj #>->FilterOptions->render("body");
+}
+?>
+</div>
+
