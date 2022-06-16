@@ -41,8 +41,8 @@ body {
 }
 
 .ew-login-box {
-    margin-top: 182px;
-    margin-bottom: 220px;
+    margin-top: 220px;
+    margin-bottom: 163px;
     background-color:#1E74FF;
     border: 0px solid;
     border-radius: 10px;
@@ -150,8 +150,9 @@ loadjs.ready("head", function() {
 
 <input type="hidden" name="modal" value="<#= Code.write(Code.castInt(isModal)) #>">
 
-<div class="ew-login-box" style="margin-top: 220px;">
-<div class="login-logo-fix"><img src="<?= GetUrl("images/logo_register.png") ?>" alt="" class="brand-image ew-brand-image"></div>
+<div class="ew-login-box">
+<!-- <div class="login-logo-fix"><#= HeaderLogo() #></div> -->
+<div class="login-logo-fix"><img src="<?= GetUrl("images/logo_aplikasipng") ?>" alt="" class="brand-image ew-brand-image" width="90%"></div>
 <div class="login-card-fix">
     <div class="card-body-fix">
     <p class="login-box-msg"><#= Code.raw(Code.languagePhrase("LoginMsg")) #></p>
