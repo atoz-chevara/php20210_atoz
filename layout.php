@@ -354,7 +354,7 @@ ew.ready("makerjs", [
     <!-- Main Sidebar Container -->
     <aside class="<#= Code.write(Code.Config.SidebarClass) #>">
         <!-- Brand Logo //** Note: Only licensed users are allowed to change the logo ** -->
-        <a href="<#= brandHref #>" class="brand-link<#= brandLogoClass #>">
+        <a href="<#= brandHref #>" class="brand-link<#= brandLogoClass #>" style="padding: 1.83594rem 1.5rem">
             <#= HeaderLogo() #>
         </a>
         <!-- Sidebar -->
