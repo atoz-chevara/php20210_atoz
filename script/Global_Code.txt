@@ -1,0 +1,18 @@
+// Count records in a table
+// NOTE: Modify your SQL here, replace the table name, field name and the condition
+$satkersCount = ExecuteScalar("SELECT COUNT(*) 'Kabupaten/Kota' FROM `satkers` WHERE kode_pemda NOT IN (01.00);");
+
+// $berkasmasukCount = ExecuteScalar("SELECT COUNT(*) 'Berkas Masuk' FROM pertanggungjawaban2022;");
+
+$berkastdklengkapCount = ExecuteScalar("SELECT COUNT(*) 'Tidak Lengkap' FROM `pertanggungjawaban2022` WHERE status = '0';");
+
+$berkasblmlengkapCount = ExecuteScalar("SELECT COUNT(*) 'Belum Lengkap' FROM `pertanggungjawaban2022` WHERE status = '1';");
+
+$berkaslengkapCount = ExecuteScalar("SELECT COUNT(*) 'Lengkap' FROM `pertanggungjawaban2022` WHERE status = '2';");
+
+// $statusberkasCount = ExecuteScalar("SELECT 
+//    COUNT(IF(status = '0', 1, NULL)) 'Tidak Lengkap',
+//    COUNT(IF(status = '1', 1, NULL)) 'Belum Lengkap',
+//    COUNT(IF(status = '2', 1, NULL)) 'Lengkap'
+//FROM
+//    pertanggungjawaban2022;");
